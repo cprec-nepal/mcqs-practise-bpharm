@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assessment Pro | Interactive MCQ</title>
+  
+  <!-- Premium Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- VARIABLES & RESET --- */
+    :root {
+      --primary: #4f46e5;
+      --primary-glow: rgba(79, 70, 229, 0.4);
+      --secondary: #64748b;
+      --bg-glass: rgba(255, 255, 255, 0.85);
+      --bg-card: rgba(255, 255, 255, 0.6);
+      --border-glass: rgba(255, 255, 255, 0.6);
+      --text-dark: #0f172a;
+      --text-gray: #475569;
+      --success: #10b981;
+      --error: #ef4444;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 10px;
+      --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.1);
+      --shadow-hover: 0 20px 40px -10px rgba(79, 70, 229, 0.2);
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      color: var(--text-dark);
+      min-height: 100vh;
+      /* Premium Animated Background */
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+      background-size: 200% 200%;
+      background-attachment: fixed;
+      animation: bgShift 20s ease infinite;
+      overflow-x: hidden;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- LAYOUT --- */
+    .app-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* --- HEADER --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .logo-icon {
+      background: rgba(255,255,255,0.2);
+      padding: 8px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+    }
+
+    .user-pill {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; box-shadow: 0 0 8px #34d399; }
+
+    /* --- CARDS (Glassmorphism) --- */
+    .card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27), box-shadow 0.3s ease;
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header { margin-bottom: 30px; }
+    .card-title { font-size: 1.75rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.03em; color: var(--text-dark); }
+    .card-subtitle { color: var(--text-gray); font-size: 1rem; margin: 0; }
+
+    /* --- FORMS --- */
+    .form-group { margin-bottom: 24px; position: relative; }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-gray);
+      margin-left: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid transparent;
+      background: #fff;
+      border-radius: var(--radius-md);
+      font-family: var(--font-main);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px -5px var(--primary-glow);
+    }
+
+    /* --- BUTTONS --- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 32px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn:active { transform: scale(0.98); }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #4338ca;
+      box-shadow: 0 8px 25px var(--primary-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text-dark);
+      border: 1px solid #e2e8f0;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .btn-icon { padding: 12px; border-radius: 50%; }
+    
+    .btn-text {
+      background: transparent;
+      color: var(--text-gray);
+      padding: 0;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .btn-text:hover { color: var(--primary); }
+
+    /* --- PLAY MODE UI --- */
+    .progress-wrapper {
+      margin-bottom: 30px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-gray);
+    }
+    .progress-track {
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #818cf8);
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .q-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 30px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+
+    .q-stem {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    .options-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .opt {
+      padding: 18px 24px;
+      border: 2px solid #f1f5f9;
+      border-radius: var(--radius-sm);
+      background: #fff;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .opt:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+      transform: translateX(5px);
+    }
+
+    /* States */
+    .opt.selected {
+      border-color: var(--primary);
+      background: #eef2ff;
+      color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .opt.correct {
+      border-color: var(--success);
+      background: #ecfdf5;
+      color: #064e3b;
+      box-shadow: 0 0 0 1px var(--success);
+    }
+    .opt.correct::after {
+      content: '✓';
+      position: absolute;
+      right: 20px;
+      font-weight: 800;
+    }
+    .opt.wrong {
+      border-color: var(--error);
+      background: #fef2f2;
+      color: #7f1d1d;
+      box-shadow: 0 0 0 1px var(--error);
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    /* --- RESULT CARD --- */
+    .result-card {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+    }
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 10px 30px -5px var(--primary-glow);
+      position: relative;
+    }
+    .score-circle::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, transparent, var(--primary));
+      z-index: -1;
+      animation: spin 10s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* --- MODAL --- */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: #fff;
+      width: 90%; max-width: 420px;
+      padding: 32px;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-align: center;
+    }
+    .modal-overlay.active .modal { transform: scale(1); }
+    .modal h3 { font-size: 1.5rem; margin: 0 0 10px 0; color: var(--text-dark); }
+
+    /* --- UTILITIES --- */
+    .hidden { display: none !important; }
+    .flex-row { display: flex; gap: 16px; align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      background: #1e293b; color: #fff;
+      padding: 12px 24px; border-radius: 50px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      font-size: 0.9rem; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      animation: slideUp 0.3s ease-out;
+    }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Confetti Canvas */
+    #confetti {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 90;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .app-container { margin: 20px auto; padding: 0 16px; }
+      .card { padding: 24px; }
+      .card-title { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div id="toast-container"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        </div>
+        <span>AssessmentPro</span>
+      </div>
+      <div id="userBadge" class="user-pill hidden">
+        <div class="status-dot"></div>
+        <span id="userEmailDisplay"></span>
+      </div>
+    </header>
+
+    <!-- SECTION 1: VERIFICATION -->
+    <section id="verifyCard" class="card">
+      <div class="card-header">
+        <h2 class="card-title">Welcome Back</h2>
+        <p class="card-subtitle">Secure access required. Please verify your email.</p>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="you@company.com" />
+      </div>
+      <button id="btnSend" class="btn btn-primary">
+        <span>Send Verification Code</span>
+      </button>
+      <p id="verifyMsg" style="margin-top: 16px; font-size: 0.9rem; color: var(--text-gray);"></p>
+    </section>
+
+    <!-- SECTION 2: FILTERS -->
+    <section id="filterCard" class="card hidden">
+      <div class="card-header">
+        <h2 class="card-title">Setup Quiz</h2>
+        <p class="card-subtitle">Select parameters to generate your assessment.</p>
+      </div>
+      
+      <div class="form-group">
+        <label>Subject <span style="color:var(--primary)">*</span></label>
+        <select id="subject">
+          <option value="" disabled selected>Select Subject...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>College (Optional)</label>
+        <select id="college">
+          <option value="">Any College</option>
+        </select>
+      </div>
+
+      <div class="flex-row" style="flex-wrap: wrap;">
+        <button id="btnView" class="btn btn-secondary" style="flex: 1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          View Questions
+        </button>
+        <button id="btnPlay" class="btn btn-primary" style="flex: 1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Start Quiz
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 3: VIEW MODE -->
+    <section id="viewMode" class="card hidden">
+      <div class="flex-row justify-between" style="margin-bottom: 20px;">
+        <h2 class="card-title" style="font-size: 1.4rem;">Question Bank</h2>
+        <button id="btnBackView" class="btn-text">← Back</button>
+      </div>
+      <div id="list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+    </section>
+
+    <!-- SECTION 4: PLAY MODE -->
+    <section id="playMode" class="card hidden">
+      <div class="progress-wrapper">
+        <div class="progress-labels">
+          <span id="progressText">Question 1</span>
+          <span id="scoreText">Score: 0</span>
+        </div>
+        <div class="progress-track">
+          <div id="progressBar" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="playQ" class="q-card">
+        <!-- Dynamic Content -->
+      </div>
+
+      <div class="flex-row justify-between" style="margin-top: 24px;">
+        <button id="prev" class="btn btn-secondary btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <button id="finish" class="btn btn-primary hidden">Finish Quiz</button>
+        <button id="next" class="btn btn-primary">
+          Next 
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div id="finalScore" class="result-card hidden">
+        <div class="score-circle" id="finalScoreVal">0</div>
+        <h3>Quiz Completed!</h3>
+        <p style="color:var(--text-gray); margin-bottom: 24px;" id="finalMsg">Great job.</p>
+        <button id="btnRestart" class="btn btn-secondary">Take New Quiz</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Verification Modal -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div style="background:#eff6ff; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </div>
+      <h3>Check your email</h3>
+      <p style="color:var(--text-gray); margin-bottom:24px;">Enter the 6-digit code sent to your address.</p>
+      <input type="text" id="code" maxlength="6" placeholder="000000" style="text-align:center; letter-spacing:5px; font-weight:700; font-size:1.5rem; margin-bottom:20px;" />
+      <button id="btnVerify" class="btn btn-primary" style="width:100%">Verify & Continue</button>
+      <button id="btnCancelModal" class="btn-text" style="margin-top:16px; width:100%;">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    /* --- LOGIC CORE --- */
+    const API_URL = "https://script.google.com/macros/s/AKfycbzwEvUtuaCbSQYy7gX0FI7KLweLr-7hH64re2akW0jmlm6kImRDtRCoaWJJIWH8o2JLvA/exec";
+    
+    const state = {
+      pool: [], idx: 0, score: 0, answered: [],
+      user: { email: '', verified: false }
+    };
+
+    const UI = {
+      sections: {
+        verify: document.getElementById('verifyCard'),
+        filter: document.getElementById('filterCard'),
+        view: document.getElementById('viewMode'),
+        play: document.getElementById('playMode')
+      },
+      inputs: { email: document.getElementById('email'), code: document.getElementById('code'), subject: document.getElementById('subject'), college: document.getElementById('college') },
+      buttons: { send: document.getElementById('btnSend'), verify: document.getElementById('btnVerify'), view: document.getElementById('btnView'), play: document.getElementById('btnPlay'), prev: document.getElementById('prev'), next: document.getElementById('next'), finish: document.getElementById('finish'), cancel: document.getElementById('btnCancelModal'), back: document.getElementById('btnBackView'), restart: document.getElementById('btnRestart') },
+      display: { verifyMsg: document.getElementById('verifyMsg'), list: document.getElementById('list'), playQ: document.getElementById('playQ'), progText: document.getElementById('progressText'), scoreText: document.getElementById('scoreText'), progBar: document.getElementById('progressBar'), modal: document.getElementById('modalOverlay'), badge: document.getElementById('userBadge'), emailTxt: document.getElementById('userEmailDisplay'), final: document.getElementById('finalScore'), finalScore: document.getElementById('finalScoreVal'), finalMsg: document.getElementById('finalMsg') }
+    };
+
+    /* --- UTILITIES --- */
+    const toast = (msg, type='info') => {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerText = msg;
+      container.appendChild(el);
+      setTimeout(() => { el.style.opacity='0'; el.style.transform='translateY(20px)'; setTimeout(()=>el.remove(), 300); }, 3000);
+    };
+
+    const fetchJSON = async (url) => {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        return await res.json();
+      } catch (e) { toast('Connection Error', 'error'); throw e; }
+    };
+
+    const setLoad = (btn, load, txt) => {
+      if(load) {
+        btn.dataset.txt = btn.innerHTML;
+        btn.innerHTML = `<div class="spinner"></div> Loading...`;
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = btn.dataset.txt || txt;
+        btn.disabled = false;
+      }
+    };
+
+    const switchSec = (name) => {
+      Object.values(UI.sections).forEach(el => el.classList.add('hidden'));
+      UI.sections[name].classList.remove('hidden');
+    };
+
+    /* --- VERIFICATION --- */
+    UI.buttons.send.onclick = async () => {
+      const email = UI.inputs.email.value.trim();
+      if(!email) return toast('Please enter email', 'error');
+      setLoad(UI.buttons.send, true);
+      const res = await fetchJSON(`${API_URL}?type=sendCode&email=${encodeURIComponent(email)}`);
+      setLoad(UI.buttons.send, false, '<span>Send Verification Code</span>');
+      
+      if(res.success) {
+        if(res.alreadyVerified) {
+          UI.display.verifyMsg.innerText = "Verified!";
+          unlock(email);
+        } else {
+          UI.display.verifyMsg.innerText = "Code sent.";
+          UI.display.modal.classList.add('active');
+          UI.inputs.code.focus();
+        }
+      } else toast(res.msg || 'Error', 'error');
+    };
+
+    UI.buttons.verify.onclick = async () => {
+      const email = UI.inputs.email.value.trim();
+      const code = UI.inputs.code.value.trim();
+      if(!code) return toast('Enter code', 'error');
+      UI.buttons.verify.innerText = "Verifying...";
+      const res = await fetchJSON(`${API_URL}?type=verifyCode&email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`);
+      if(res.success) {
+        UI.display.modal.classList.remove('active');
+        unlock(email);
+      } else toast(res.msg || 'Invalid Code', 'error');
+      UI.buttons.verify.innerText = "Verify & Continue";
+    };
+
+    UI.buttons.cancel.onclick = () => UI.display.modal.classList.remove('active');
+
+    const unlock = (email) => {
+      state.user.verified = true;
+      state.user.email = email;
+      UI.inputs.email.disabled = true;
+      UI.buttons.send.classList.add('hidden');
+      UI.display.verifyMsg.style.display = 'none';
+      UI.display.badge.classList.remove('hidden');
+      UI.display.emailTxt.innerText = email;
+      switchSec('filter');
+      loadFilters();
+    };
+
+    /* --- FILTERS --- */
+    const loadFilters = async () => {
+      const res = await fetchJSON(`${API_URL}?type=getFilters`);
+      if(res.success) {
+        UI.inputs.subject.innerHTML = '<option value="" disabled selected>Select Subject</option>' + res.subjects.map(s=>`<option value="${s}">${s}</option>`).join('');
+        UI.inputs.college.innerHTML = '<option value="">Any College</option>' + res.colleges.map(c=>`<option value="${c}">${c}</option>`).join('');
+      }
+    };
+    UI.inputs.subject.onchange = () => {
+      const ok = !!UI.inputs.subject.value;
+      UI.buttons.view.disabled = !ok;
+      UI.buttons.play.disabled = !ok;
+    };
+
+    const getMCQs = async () => {
+      setLoad(UI.buttons.play, true);
+      setLoad(UI.buttons.view, true);
+      const res = await fetchJSON(`${API_URL}?type=getMCQs`);
+      const data = (res.mcqs||[]).filter(r => r.subject===UI.inputs.subject.value && (UI.inputs.college.value ? r.college===UI.inputs.college.value : true));
+      setLoad(UI.buttons.play, false, '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start Quiz');
+      setLoad(UI.buttons.view, false, '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> View Questions');
+      return data;
+    };
+
+    /* --- VIEW MODE --- */
+    UI.buttons.view.onclick = async () => {
+      state.pool = await getMCQs();
+      if(!state.pool.length) return toast('No questions found', 'error');
+      switchSec('view');
+      UI.display.list.innerHTML = state.pool.map(q => `
+        <div class="q-card">
+          <div style="font-size:0.8rem; color:var(--text-gray); font-weight:700; text-transform:uppercase; margin-bottom:8px;">${q.subject}</div>
+          <div class="q-stem">${q.q}</div>
+          <div style="margin-top:16px;">
+            ${q.options.map((o,i)=>o?`<div class="opt ${o.startsWith(q.answer+'.')?'correct':''}" style="cursor:default; opacity:${o.startsWith(q.answer+'.')?1:0.7};">${o}</div>`:'').join('')}
+          </div>
+        </div>
+      `).join('');
+    };
+    UI.buttons.back.onclick = () => switchSec('filter');
+
+    /* --- PLAY MODE --- */
+    UI.buttons.play.onclick = async () => {
+      state.pool = await getMCQs();
+      if(!state.pool.length) return toast('No questions', 'error');
+      state.idx = 0; state.score = 0; state.answered = new Array(state.pool.length).fill(null);
+      UI.display.final.classList.add('hidden');
+      UI.display.playQ.style.display = 'block';
+      switchSec('play');
+      renderQ();
+    };
+
+    const renderQ = () => {
+      const q = state.pool[state.idx];
+      const total = state.pool.length;
+      UI.display.progText.innerText = `Question ${state.idx+1}`;
+      UI.display.scoreText.innerText = `Score: ${state.score}`;
+      UI.display.progBar.style.width = `${((state.idx)/total)*100}%`;
+
+      UI.display.playQ.innerHTML = `
+        <div style="font-size:0.85rem; color:var(--primary); font-weight:700; margin-bottom:10px;">${q.subject}</div>
+        <div class="q-stem">${q.q}</div>
+        <div class="options-grid" id="opts"></div>
+      `;
+      
+      const opts = document.getElementById('opts');
+      q.options.forEach((o,i)=>{
+        if(!o) return;
+        const el = document.createElement('div');
+        el.className = 'opt';
+        const letter = String.fromCharCode(65+i);
+        el.innerText = `${letter}. ${o.replace(letter+'. ', '')}`;
+        
+        if(state.answered[state.idx]) {
+          el.style.pointerEvents = 'none';
+          if(letter===q.answer) el.classList.add('correct');
+          else if(letter===state.answered[state.idx].selected) el.classList.add('wrong');
+        } else {
+          el.onclick = () => {
+            state.answered[state.idx] = { selected: letter };
+            const correct = (letter === q.answer);
+            if(correct) state.score++;
+            
+            // Visuals
+            if(correct) { el.classList.add('correct'); toast('Correct!', 'success'); }
+            else { 
+              el.classList.add('wrong'); 
+              Array.from(opts.children).forEach(c=>{ if(c.innerText.startsWith(q.answer)) c.classList.add('correct'); }); 
+              toast('Incorrect', 'error');
+            }
+            Array.from(opts.children).forEach(c=>c.style.pointerEvents='none');
+            
+            UI.display.scoreText.innerText = `Score: ${state.score}`;
+          };
+        }
+        opts.appendChild(el);
+      });
+
+      // Buttons
+      UI.buttons.prev.disabled = state.idx===0;
+      if(state.idx===total-1) { UI.buttons.next.classList.add('hidden'); UI.buttons.finish.classList.remove('hidden'); }
+      else { UI.buttons.next.classList.remove('hidden'); UI.buttons.finish.classList.add('hidden'); }
+    };
+
+    UI.buttons.next.onclick = () => { if(state.idx<state.pool.length-1){ state.idx++; renderQ(); } };
+    UI.buttons.prev.onclick = () => { if(state.idx>0){ state.idx--; renderQ(); } };
+    UI.buttons.finish.onclick = () => {
+      UI.display.playQ.style.display = 'none';
+      UI.buttons.next.classList.add('hidden');
+      UI.buttons.finish.classList.add('hidden');
+      UI.display.final.classList.remove('hidden');
+      UI.display.finalScore.innerText = state.score;
+      UI.display.finalMsg.innerText = (state.score/state.pool.length > 0.7) ? "Excellent performance!" : "Keep practicing!";
+      
+      if(state.score > 0) fireConfetti();
+    };
+
+    UI.buttons.restart.onclick = () => {
+      UI.display.final.classList.add('hidden');
+      UI.display.playQ.style.display = 'block';
+      state.idx=0; state.score=0; state.answered=new Array(state.pool.length).fill(null);
+      renderQ();
+    };
+
+    /* --- CONFETTI EFFECT --- */
+    const fireConfetti = () => {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+      for(let i=0; i<150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+          color: `hsl(${Math.random()*360}, 70%, 50%)`,
+          size: Math.random() * 8 + 2, speedY: Math.random() * 3 + 2, speedX: Math.random() * 2 - 1
+        });
+      }
+      const animate = () => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach((p,i) => {
+          p.y += p.speedY; p.x += Math.sin(p.y/50);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+          if(p.y > canvas.height) p.y = -10;
+        });
+        requestAnimationFrame(animate);
+      };
+      animate();
+      setTimeout(() => ctx.clearRect(0,0,canvas.width,canvas.height), 4000);
+    };
+  </script>
+</body>
+</html>
