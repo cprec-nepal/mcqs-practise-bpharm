@@ -2,791 +2,598 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assessment Pro | Interactive MCQ</title>
-  
-  <!-- Premium Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>MCQ Master | CPREC Nepal</title>
   <style>
-    /* --- VARIABLES & RESET --- */
+    /* --- MODERN CSS VARIABLES & RESET --- */
     :root {
-      --primary: #4f46e5;
-      --primary-glow: rgba(79, 70, 229, 0.4);
-      --secondary: #64748b;
-      --bg-glass: rgba(255, 255, 255, 0.85);
-      --bg-card: rgba(255, 255, 255, 0.6);
-      --border-glass: rgba(255, 255, 255, 0.6);
-      --text-dark: #0f172a;
-      --text-gray: #475569;
+      --primary: #6366f1; /* Indigo */
+      --primary-dark: #4f46e5;
+      --secondary: #ec4899; /* Pink */
+      --bg-gradient-start: #e0c3fc;
+      --bg-gradient-end: #8ec5fc;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
       --success: #10b981;
       --error: #ef4444;
-      --radius-lg: 24px;
-      --radius-md: 16px;
-      --radius-sm: 10px;
-      --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.1);
-      --shadow-hover: 0 20px 40px -10px rgba(79, 70, 229, 0.2);
-      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+      --radius: 20px;
+      --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
     
     body {
       margin: 0;
-      font-family: var(--font-main);
-      color: var(--text-dark);
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-main);
       min-height: 100vh;
-      /* Premium Animated Background */
-      background-color: #f8fafc;
-      background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-      background-size: 200% 200%;
-      background-attachment: fixed;
-      animation: bgShift 20s ease infinite;
+      display: flex;
+      flex-direction: column;
       overflow-x: hidden;
-    }
-
-    @keyframes bgShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* --- LAYOUT --- */
-    .app-container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
       position: relative;
-      z-index: 10;
+    }
+
+    /* Ambient Background Animation Blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      z-index: -1;
+      opacity: 0.6;
+      animation: float 10s infinite ease-in-out;
+    }
+    .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #c084fc; animation-delay: 0s; }
+    .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #60a5fa; animation-delay: 2s; }
+    .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #f472b6; animation-delay: 4s; opacity: 0.4; }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(20px, -20px); }
     }
 
     /* --- HEADER --- */
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 40px;
-      color: white;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky; top: 0; z-index: 50; padding: 1rem 0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
     }
-
+    .header-content {
+      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
     .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      font-size: 1.5rem;
-      letter-spacing: -0.02em;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .logo-icon {
-      background: rgba(255,255,255,0.2);
-      padding: 8px;
-      border-radius: 12px;
-      backdrop-filter: blur(5px);
+    /* --- MAIN LAYOUT --- */
+    main { 
+      flex: 1; width: 100%; max-width: 1200px; margin: 2rem auto; 
+      padding: 0 1.5rem; position: relative; z-index: 10; 
+    }
+    
+    /* SIDEBAR LAYOUT CSS */
+    main.quiz-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr; 
+      gap: 2rem;
+      align-items: start;
+    }
+    
+    #step-filter.sidebar-mode {
+      position: sticky;
+      top: 100px; 
+      margin-bottom: 0; 
     }
 
-    .user-pill {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 8px 16px;
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    @media (max-width: 850px) {
+      main.quiz-layout { grid-template-columns: 1fr; }
+      #step-filter.sidebar-mode { position: relative; top: 0; margin-bottom: 2rem; order: -1; }
     }
 
-    .status-dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; box-shadow: 0 0 8px #34d399; }
-
-    /* --- CARDS (Glassmorphism) --- */
-    .card {
-      background: var(--bg-glass);
+    .section-card {
+      background: var(--glass-bg);
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      border-radius: var(--radius-lg);
-      padding: 40px;
-      box-shadow: var(--shadow-soft);
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27), box-shadow 0.3s ease;
-      animation: fadeUp 0.6s ease-out forwards;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+    h2 { margin-top: 0; margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
     
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* --- FORM ELEMENTS --- */
+    .input-group { margin-bottom: 1.2rem; }
+    input[type="email"], input[type="text"], select {
+      width: 100%; padding: 0.8rem 1rem;
+      border: 2px solid transparent; background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px; font-size: 0.95rem;
+      transition: all 0.2s; color: var(--text-main);
     }
-
-    .card-header { margin-bottom: 30px; }
-    .card-title { font-size: 1.75rem; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.03em; color: var(--text-dark); }
-    .card-subtitle { color: var(--text-gray); font-size: 1rem; margin: 0; }
-
-    /* --- FORMS --- */
-    .form-group { margin-bottom: 24px; position: relative; }
-    
-    label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--text-gray);
-      margin-left: 4px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 16px 20px;
-      border: 2px solid transparent;
-      background: #fff;
-      border-radius: var(--radius-md);
-      font-family: var(--font-main);
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text-dark);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      transition: all 0.2s ease;
-    }
-
     input:focus, select:focus {
-      transform: translateY(-2px);
+      background: #fff;
       border-color: var(--primary);
-      box-shadow: 0 8px 20px -5px var(--primary-glow);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
+    
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
 
     /* --- BUTTONS --- */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px 32px;
-      border: none;
-      border-radius: var(--radius-md);
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
+    button {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white; border: none; padding: 0.8rem 1.5rem;
+      border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
     }
-    
-    .btn:active { transform: scale(0.98); }
-    
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 4px 15px var(--primary-glow);
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: #4338ca;
-      box-shadow: 0 8px 25px var(--primary-glow);
-      transform: translateY(-2px);
-    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(99, 102, 241, 0.4); }
+    button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    .btn-secondary {
-      background: white;
-      color: var(--text-dark);
-      border: 1px solid #e2e8f0;
+    button.secondary { background: white; color: var(--text-main); border: 2px solid #e2e8f0; box-shadow: none; }
+    button.secondary:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
+
+    button.btn-finish { background: linear-gradient(135deg, var(--secondary), #db2777); box-shadow: 0 4px 10px rgba(236, 72, 153, 0.4); }
+    button.btn-finish:hover { box-shadow: 0 6px 15px rgba(236, 72, 153, 0.5); }
+
+    .actions { display: flex; gap: 0.8rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    /* --- QUIZ UI --- */
+    .progress-container { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-bottom: 1.5rem; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.3s; }
+    
+    .q-stem { font-weight: 700; font-size: 1.15rem; margin-bottom: 1.5rem; line-height: 1.5; color: var(--text-main); }
+    
+    /* Option Styles */
+    .opt-item { 
+      display: flex; align-items: center; padding: 1rem; 
+      border: 2px solid transparent; border-radius: 12px; margin-bottom: 0.8rem; 
+      cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.6);
+      font-weight: 500; 
     }
-    .btn-secondary:hover:not(:disabled) {
+    .opt-item:hover:not(.disabled) { border-color: var(--primary); background: #fff; transform: scale(1.01); }
+    
+    .opt-marker { 
+      width: 30px; height: 30px; background: #e2e8f0; border-radius: 50%; 
+      display: flex; align-items: center; justify-content: center; 
+      margin-right: 15px; font-weight: 700; font-size: 0.85rem; color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    
+    /* State Classes */
+    .opt-item.selected { border-color: var(--primary); background: #eef2ff; }
+    .opt-item.selected .opt-marker { background: var(--primary); color: white; }
+    
+    .opt-item.correct { border-color: var(--success); background: #ecfdf5; }
+    .opt-item.correct .opt-marker { background: var(--success); color: white; }
+    
+    .opt-item.wrong { border-color: var(--error); background: #fef2f2; opacity: 0.8; }
+    .opt-item.wrong .opt-marker { background: var(--error); color: white; }
+    
+    .opt-item.disabled { pointer-events: none; cursor: default; }
+
+    /* Feedback Block */
+    .feedback-box {
+      margin-top: 1.5rem;
+      padding: 1.2rem;
+      border-radius: 12px;
       background: #f8fafc;
-      border-color: #cbd5e1;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-left: 5px solid var(--primary);
+      animation: slideUpFade 0.3s ease-out;
     }
 
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-    
-    .btn-icon { padding: 12px; border-radius: 50%; }
-    
-    .btn-text {
-      background: transparent;
-      color: var(--text-gray);
-      padding: 0;
-      font-weight: 600;
-      font-size: 0.95rem;
+    /* Navigation Bar */
+    .nav-controls { 
+      display: flex; justify-content: space-between; align-items: center; 
+      margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.05);
     }
-    .btn-text:hover { color: var(--primary); }
+    .nav-controls button { flex: 1; margin: 0 0.5rem; max-width: 150px; }
+    .nav-controls .btn-finish { flex: 1.5; max-width: 250px; font-size: 1rem; }
 
-    /* --- PLAY MODE UI --- */
-    .progress-wrapper {
-      margin-bottom: 30px;
-    }
-    .progress-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--text-gray);
-    }
-    .progress-track {
-      height: 10px;
-      background: #e2e8f0;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), #818cf8);
-      width: 0%;
-      border-radius: 10px;
-      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .q-card {
-      background: #fff;
-      border-radius: var(--radius-md);
-      padding: 30px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
-      margin-bottom: 30px;
-    }
-
-    .q-stem {
-      font-size: 1.25rem;
-      font-weight: 700;
-      line-height: 1.5;
-      margin-bottom: 25px;
-    }
-
-    .options-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .opt {
-      padding: 18px 24px;
-      border: 2px solid #f1f5f9;
-      border-radius: var(--radius-sm);
-      background: #fff;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-    .opt:hover {
-      border-color: #cbd5e1;
-      background: #f8fafc;
-      transform: translateX(5px);
-    }
-
-    /* States */
-    .opt.selected {
-      border-color: var(--primary);
-      background: #eef2ff;
-      color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary);
-    }
-    .opt.correct {
-      border-color: var(--success);
-      background: #ecfdf5;
-      color: #064e3b;
-      box-shadow: 0 0 0 1px var(--success);
-    }
-    .opt.correct::after {
-      content: '✓';
-      position: absolute;
-      right: 20px;
-      font-weight: 800;
-    }
-    .opt.wrong {
-      border-color: var(--error);
-      background: #fef2f2;
-      color: #7f1d1d;
-      box-shadow: 0 0 0 1px var(--error);
-      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-    }
-
-    /* --- RESULT CARD --- */
-    .result-card {
-      text-align: center;
-      padding: 40px 20px;
-      background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
-    }
-    .score-circle {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin: 0 auto 20px auto;
-      box-shadow: 0 10px 30px -5px var(--primary-glow);
-      position: relative;
-    }
-    .score-circle::after {
-      content: '';
-      position: absolute;
-      inset: -5px;
-      border-radius: 50%;
-      background: conic-gradient(from 0deg, transparent, var(--primary));
-      z-index: -1;
-      animation: spin 10s linear infinite;
-    }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-
-    /* --- MODAL --- */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(15, 23, 42, 0.4);
-      backdrop-filter: blur(8px);
-      z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s;
-    }
+    /* --- MODALS & EXTRAS --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
-    .modal {
-      background: #fff;
-      width: 90%; max-width: 420px;
-      padding: 32px;
-      border-radius: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-align: center;
-    }
-    .modal-overlay.active .modal { transform: scale(1); }
-    .modal h3 { font-size: 1.5rem; margin: 0 0 10px 0; color: var(--text-dark); }
+    .modal-box { background: white; padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: scale(0.9); transition: transform 0.3s; text-align: center; }
+    .modal-overlay.active .modal-box { transform: scale(1); }
 
-    /* --- UTILITIES --- */
-    .hidden { display: none !important; }
-    .flex-row { display: flex; gap: 16px; align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .spinner {
-      width: 20px; height: 20px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 0.8s linear infinite;
-    }
+    /* History Table */
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255,255,255,0.5); border-radius: 12px; overflow: hidden; }
+    .history-table th, .history-table td { padding: 12px 16px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .history-table th { background: rgba(255,255,255,0.8); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
+
+    /* Animations */
+    @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     
-    @keyframes shake {
-      10%, 90% { transform: translate3d(-1px, 0, 0); }
-      20%, 80% { transform: translate3d(2px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-      40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
-
-    /* Toast */
-    #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; }
-    .toast {
-      background: #1e293b; color: #fff;
-      padding: 12px 24px; border-radius: 50px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-      font-size: 0.9rem; font-weight: 500;
-      display: flex; align-items: center; gap: 8px;
-      animation: slideUp 0.3s ease-out;
-    }
-    .toast.success { background: #059669; }
-    .toast.error { background: #dc2626; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    /* Confetti Canvas */
-    #confetti {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 90;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      .app-container { margin: 20px auto; padding: 0 16px; }
-      .card { padding: 24px; }
-      .card-title { font-size: 1.5rem; }
-    }
+    .shake { animation: shake 0.3s ease-in-out; }
+    .hidden { display: none !important; } 
+    .text-center { text-align: center; }
   </style>
 </head>
 <body>
-  <canvas id="confetti"></canvas>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
   <div id="toast-container"></div>
+  <header>
+    <div class="header-content">
+      <div class="brand">MCQ<span>Master</span></div>
+      <div id="user-display" class="hidden" style="font-size: 0.85rem; font-weight: 600; background: white; padding: 0.4rem 1rem; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></div>
+    </div>
+  </header>
 
-  <div class="app-container">
-    <!-- Header -->
-    <header>
-      <div class="brand">
-        <div class="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-        </div>
-        <span>AssessmentPro</span>
+  <main>
+    <!-- 1. Verification Step -->
+    <section id="step-verify" class="section-card">
+      <h2>👋 Welcome Back</h2>
+      <p style="margin-top:-0.5rem; color: var(--text-muted); margin-bottom: 2rem;">Please verify your email to start the quiz.</p>
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="student@example.com" />
       </div>
-      <div id="userBadge" class="user-pill hidden">
-        <div class="status-dot"></div>
-        <span id="userEmailDisplay"></span>
-      </div>
-    </header>
-
-    <!-- SECTION 1: VERIFICATION -->
-    <section id="verifyCard" class="card">
-      <div class="card-header">
-        <h2 class="card-title">Welcome Back</h2>
-        <p class="card-subtitle">Secure access required. Please verify your email.</p>
-      </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="you@company.com" />
-      </div>
-      <button id="btnSend" class="btn btn-primary">
-        <span>Send Verification Code</span>
-      </button>
-      <p id="verifyMsg" style="margin-top: 16px; font-size: 0.9rem; color: var(--text-gray);"></p>
+      <button id="btn-send-code" style="width: 100%;">Send Verification Code</button>
     </section>
 
-    <!-- SECTION 2: FILTERS -->
-    <section id="filterCard" class="card hidden">
-      <div class="card-header">
-        <h2 class="card-title">Setup Quiz</h2>
-        <p class="card-subtitle">Select parameters to generate your assessment.</p>
+    <!-- 2. Filter Step (Dashboard / Sidebar) -->
+    <section id="step-filter" class="section-card hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem; margin:0;">📚 Setup</h2>
+        <button class="secondary" style="padding:0.4rem 1rem; font-size:0.85rem;" onclick="showHistory()">📊 History</button>
       </div>
       
-      <div class="form-group">
-        <label>Subject <span style="color:var(--primary)">*</span></label>
-        <select id="subject">
-          <option value="" disabled selected>Select Subject...</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>College (Optional)</label>
-        <select id="college">
-          <option value="">Any College</option>
-        </select>
-      </div>
-
-      <div class="flex-row" style="flex-wrap: wrap;">
-        <button id="btnView" class="btn btn-secondary" style="flex: 1;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          View Questions
-        </button>
-        <button id="btnPlay" class="btn btn-primary" style="flex: 1;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          Start Quiz
-        </button>
-      </div>
-    </section>
-
-    <!-- SECTION 3: VIEW MODE -->
-    <section id="viewMode" class="card hidden">
-      <div class="flex-row justify-between" style="margin-bottom: 20px;">
-        <h2 class="card-title" style="font-size: 1.4rem;">Question Bank</h2>
-        <button id="btnBackView" class="btn-text">← Back</button>
-      </div>
-      <div id="list" style="display: flex; flex-direction: column; gap: 16px;"></div>
-    </section>
-
-    <!-- SECTION 4: PLAY MODE -->
-    <section id="playMode" class="card hidden">
-      <div class="progress-wrapper">
-        <div class="progress-labels">
-          <span id="progressText">Question 1</span>
-          <span id="scoreText">Score: 0</span>
+      <div class="row">
+        <div class="input-group">
+          <label for="faculty">Faculty</label>
+          <select id="faculty"><option value="">Loading...</option></select>
         </div>
-        <div class="progress-track">
-          <div id="progressBar" class="progress-fill"></div>
+        <div class="input-group">
+          <label for="level">Level</label>
+          <select id="level"><option value="">Any Level</option></select>
         </div>
       </div>
-
-      <div id="playQ" class="q-card">
-        <!-- Dynamic Content -->
-      </div>
-
-      <div class="flex-row justify-between" style="margin-top: 24px;">
-        <button id="prev" class="btn btn-secondary btn-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        </button>
-        <button id="finish" class="btn btn-primary hidden">Finish Quiz</button>
-        <button id="next" class="btn btn-primary">
-          Next 
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
-      </div>
-
-      <div id="finalScore" class="result-card hidden">
-        <div class="score-circle" id="finalScoreVal">0</div>
-        <h3>Quiz Completed!</h3>
-        <p style="color:var(--text-gray); margin-bottom: 24px;" id="finalMsg">Great job.</p>
-        <button id="btnRestart" class="btn btn-secondary">Take New Quiz</button>
+      
+      <div class="actions" style="flex-direction:column;">
+        <button id="btn-play" disabled style="width:100%; margin-bottom:0.5rem;">🚀 Start Quiz</button>
+        <button id="btn-view" class="secondary" disabled style="width:100%;">👁️ View List</button>
       </div>
     </section>
-  </div>
+
+    <!-- 2.5 History View -->
+    <section id="view-history" class="section-card hidden">
+      <div class="actions" style="margin-bottom: 1rem;">
+        <button id="btn-back-filter" class="secondary">← Back</button>
+      </div>
+      <h3>My History</h3>
+      <div style="overflow-x: auto;">
+        <table class="history-table">
+          <thead><tr><th>Date</th><th>Faculty</th><th>Score</th><th>Total</th><th>Result</th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. Play Mode -->
+    <section id="mode-play" class="section-card hidden">
+      <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      
+      <div style="display:flex; justify-content:space-between; margin-bottom:1rem; color:var(--text-muted); font-weight:600; font-size:0.85rem;">
+        <span id="q-counter">Q 1/10</span>
+        <span id="score-tracker" style="color:var(--primary);">Score: 0</span>
+      </div>
+      
+      <div id="play-area"></div>
+      
+      <div class="nav-controls">
+        <button id="btn-prev" class="secondary">← Prev</button>
+        <button id="btn-finish" class="btn-finish">✓ Finish</button>
+        <button id="btn-next">Next →</button>
+      </div>
+    </section>
+
+    <!-- 4. View Mode -->
+    <section id="mode-view" class="section-card hidden">
+      <div class="actions" style="margin-bottom: 1rem;"><button id="btn-back-filter-main" class="secondary">← Back to Setup</button></div>
+      <div id="view-list"></div>
+    </section>
+  </main>
 
   <!-- Verification Modal -->
-  <div id="modalOverlay" class="modal-overlay">
-    <div class="modal">
-      <div style="background:#eff6ff; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title" style="margin-top:0;">Check Inbox</h3>
+      <p style="color:var(--text-muted); margin-bottom: 1.5rem;">We sent a code to <b id="modal-email-display"></b>.</p>
+      <div class="input-group">
+        <input type="text" id="verify-code" placeholder="123456" maxlength="6" style="letter-spacing: 4px; text-align: center; font-weight: 700;" />
       </div>
-      <h3>Check your email</h3>
-      <p style="color:var(--text-gray); margin-bottom:24px;">Enter the 6-digit code sent to your address.</p>
-      <input type="text" id="code" maxlength="6" placeholder="000000" style="text-align:center; letter-spacing:5px; font-weight:700; font-size:1.5rem; margin-bottom:20px;" />
-      <button id="btnVerify" class="btn btn-primary" style="width:100%">Verify & Continue</button>
-      <button id="btnCancelModal" class="btn-text" style="margin-top:16px; width:100%;">Cancel</button>
+      <button id="btn-verify" style="width:100%">Verify</button>
+      <button id="btn-cancel-modal" class="secondary" style="width:100%; margin-top:0.5rem;">Cancel</button>
     </div>
   </div>
 
   <script>
-    /* --- LOGIC CORE --- */
+    // UPDATED API URL
     const API_URL = "https://script.google.com/macros/s/AKfycbzwEvUtuaCbSQYy7gX0FI7KLweLr-7hH64re2akW0jmlm6kImRDtRCoaWJJIWH8o2JLvA/exec";
-    
-    const state = {
-      pool: [], idx: 0, score: 0, answered: [],
-      user: { email: '', verified: false }
+
+    const state = { 
+      email: '', verified: false, 
+      faculties: [], levels: [], 
+      mcqs: [], 
+      currentQIndex: 0, 
+      answers: {},      
+      score: 0, 
+      currentFaculty: '', currentLevel: '' 
     };
 
-    const UI = {
-      sections: {
-        verify: document.getElementById('verifyCard'),
-        filter: document.getElementById('filterCard'),
-        view: document.getElementById('viewMode'),
-        play: document.getElementById('playMode')
-      },
-      inputs: { email: document.getElementById('email'), code: document.getElementById('code'), subject: document.getElementById('subject'), college: document.getElementById('college') },
-      buttons: { send: document.getElementById('btnSend'), verify: document.getElementById('btnVerify'), view: document.getElementById('btnView'), play: document.getElementById('btnPlay'), prev: document.getElementById('prev'), next: document.getElementById('next'), finish: document.getElementById('finish'), cancel: document.getElementById('btnCancelModal'), back: document.getElementById('btnBackView'), restart: document.getElementById('btnRestart') },
-      display: { verifyMsg: document.getElementById('verifyMsg'), list: document.getElementById('list'), playQ: document.getElementById('playQ'), progText: document.getElementById('progressText'), scoreText: document.getElementById('scoreText'), progBar: document.getElementById('progressBar'), modal: document.getElementById('modalOverlay'), badge: document.getElementById('userBadge'), emailTxt: document.getElementById('userEmailDisplay'), final: document.getElementById('finalScore'), finalScore: document.getElementById('finalScoreVal'), finalMsg: document.getElementById('finalMsg') }
+    const $ = id => document.getElementById(id);
+    const els = {
+      email: $('email'), btnSend: $('btn-send-code'),
+      stepVerify: $('step-verify'), stepFilter: $('step-filter'), viewHistory: $('view-history'),
+      faculty: $('faculty'), level: $('level'), 
+      btnPlay: $('btn-play'), btnView: $('btn-view'),
+      modePlay: $('mode-play'), modeView: $('mode-view'),
+      playArea: $('play-area'), viewList: $('view-list'),
+      progressBar: $('progress-bar'), qCounter: $('q-counter'), scoreTracker: $('score-tracker'),
+      btnPrev: $('btn-prev'), btnNext: $('btn-next'), btnFinish: $('btn-finish'),
+      modalOverlay: $('modal-overlay'), modalEmail: $('modal-email-display'),
+      verifyCode: $('verify-code'), btnVerify: $('btn-verify'), btnCancelModal: $('btn-cancel-modal'),
+      btnBackFilter: $('btn-back-filter'), btnBackFilterMain: $('btn-back-filter-main'), 
+      historyBody: $('history-body'), userDisplay: $('user-display')
     };
 
     /* --- UTILITIES --- */
-    const toast = (msg, type='info') => {
-      const container = document.getElementById('toast-container');
-      const el = document.createElement('div');
-      el.className = `toast ${type}`;
-      el.innerText = msg;
-      container.appendChild(el);
-      setTimeout(() => { el.style.opacity='0'; el.style.transform='translateY(20px)'; setTimeout(()=>el.remove(), 300); }, 3000);
-    };
+    function showToast(msg, type = 'info') {
+      const container = $('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+      toast.innerHTML = `<span style="font-size:1.1rem">${icon}</span> <span style="margin-left:8px;">${msg}</span>`;
+      toast.style.cssText = "background:white; padding:1rem; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.1); border-left:5px solid " + (type==='error'?'#ef4444':type==='success'?'#10b981':'#6366f1') + "; display:flex; align-items:center; margin-bottom:10px; animation: slideUpFade 0.3s;";
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
 
-    const fetchJSON = async (url) => {
-      try {
-        const res = await fetch(url, { cache: 'no-store' });
-        return await res.json();
-      } catch (e) { toast('Connection Error', 'error'); throw e; }
-    };
-
-    const setLoad = (btn, load, txt) => {
-      if(load) {
-        btn.dataset.txt = btn.innerHTML;
-        btn.innerHTML = `<div class="spinner"></div> Loading...`;
-        btn.disabled = true;
-      } else {
-        btn.innerHTML = btn.dataset.txt || txt;
-        btn.disabled = false;
+    // ROBUST FETCH FOR GAS
+    async function fetchJSON(url) {
+      try { 
+        const res = await fetch(url, { 
+          method: 'GET',
+          redirect: 'follow',
+          cache: 'no-store' 
+        });
+        const text = await res.text();
+        // Regex to extract JSON from GAS response which might be wrapped in text/html
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) return JSON.parse(jsonMatch[0]);
+        return JSON.parse(text);
+      } catch (e) { 
+        console.error(e); showToast("Connection Error", "error"); 
+        return { success: false }; 
       }
-    };
+    }
 
-    const switchSec = (name) => {
-      Object.values(UI.sections).forEach(el => el.classList.add('hidden'));
-      UI.sections[name].classList.remove('hidden');
-    };
-
-    /* --- VERIFICATION --- */
-    UI.buttons.send.onclick = async () => {
-      const email = UI.inputs.email.value.trim();
-      if(!email) return toast('Please enter email', 'error');
-      setLoad(UI.buttons.send, true);
+    /* --- AUTH --- */
+    els.btnSend.onclick = async () => {
+      const email = els.email.value.trim(); 
+      if (!email) return showToast("Enter email", "error");
+      els.btnSend.disabled = true; els.btnSend.textContent = "Sending...";
       const res = await fetchJSON(`${API_URL}?type=sendCode&email=${encodeURIComponent(email)}`);
-      setLoad(UI.buttons.send, false, '<span>Send Verification Code</span>');
-      
-      if(res.success) {
-        if(res.alreadyVerified) {
-          UI.display.verifyMsg.innerText = "Verified!";
-          unlock(email);
-        } else {
-          UI.display.verifyMsg.innerText = "Code sent.";
-          UI.display.modal.classList.add('active');
-          UI.inputs.code.focus();
-        }
-      } else toast(res.msg || 'Error', 'error');
+      els.btnSend.disabled = false; els.btnSend.textContent = "Send Verification Code";
+      if (res.success) { state.email = email; els.modalEmail.textContent = email; els.modalOverlay.classList.add('active'); els.verifyCode.focus(); } 
+      else showToast(res.message, "error");
     };
 
-    UI.buttons.verify.onclick = async () => {
-      const email = UI.inputs.email.value.trim();
-      const code = UI.inputs.code.value.trim();
-      if(!code) return toast('Enter code', 'error');
-      UI.buttons.verify.innerText = "Verifying...";
-      const res = await fetchJSON(`${API_URL}?type=verifyCode&email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`);
-      if(res.success) {
-        UI.display.modal.classList.remove('active');
-        unlock(email);
-      } else toast(res.msg || 'Invalid Code', 'error');
-      UI.buttons.verify.innerText = "Verify & Continue";
+    els.btnVerify.onclick = async () => {
+      const code = els.verifyCode.value.trim(); 
+      if (!code) return showToast("Enter code", "error");
+      els.btnVerify.disabled = true;
+      const res = await fetchJSON(`${API_URL}?type=verifyCode&email=${encodeURIComponent(state.email)}&code=${encodeURIComponent(code)}`);
+      els.btnVerify.disabled = false;
+      if (res.success) { showToast("Verified!", "success"); closeModal(); completeVerification(); } 
+      else { showToast(res.message, "error"); els.verifyCode.classList.add('shake'); setTimeout(()=>els.verifyCode.classList.remove('shake'), 500); }
     };
+    els.btnCancelModal.onclick = closeModal; 
+    function closeModal() { els.modalOverlay.classList.remove('active'); }
 
-    UI.buttons.cancel.onclick = () => UI.display.modal.classList.remove('active');
-
-    const unlock = (email) => {
-      state.user.verified = true;
-      state.user.email = email;
-      UI.inputs.email.disabled = true;
-      UI.buttons.send.classList.add('hidden');
-      UI.display.verifyMsg.style.display = 'none';
-      UI.display.badge.classList.remove('hidden');
-      UI.display.emailTxt.innerText = email;
-      switchSec('filter');
+    function completeVerification() {
+      state.verified = true; 
+      els.stepVerify.classList.add('hidden'); 
+      els.stepFilter.classList.remove('hidden');
+      els.userDisplay.textContent = state.email; els.userDisplay.classList.remove('hidden'); 
+      document.querySelector('main').classList.add('quiz-layout');
+      els.stepFilter.classList.add('sidebar-mode');
       loadFilters();
-    };
+    }
 
     /* --- FILTERS --- */
-    const loadFilters = async () => {
+    async function loadFilters() {
       const res = await fetchJSON(`${API_URL}?type=getFilters`);
-      if(res.success) {
-        UI.inputs.subject.innerHTML = '<option value="" disabled selected>Select Subject</option>' + res.subjects.map(s=>`<option value="${s}">${s}</option>`).join('');
-        UI.inputs.college.innerHTML = '<option value="">Any College</option>' + res.colleges.map(c=>`<option value="${c}">${c}</option>`).join('');
+      if (res.success) {
+        // Handle nested 'data' structure from backend
+        const payload = res.data || res;
+        state.faculties = payload.subjects || []; 
+        state.levels = payload.colleges || []; 
+        els.faculty.innerHTML = '<option value="">Select Faculty...</option>' + state.faculties.map(s => `<option value="${s}">${s}</option>`).join('');
+        els.level.innerHTML = '<option value="">Any Level</option>' + state.levels.map(c => `<option value="${c}">${c}</option>`).join('');
       }
-    };
-    UI.inputs.subject.onchange = () => {
-      const ok = !!UI.inputs.subject.value;
-      UI.buttons.view.disabled = !ok;
-      UI.buttons.play.disabled = !ok;
+    }
+
+    function toggleActionButtons() { const ok = !!els.faculty.value; els.btnPlay.disabled = !ok; els.btnView.disabled = !ok; }
+    els.faculty.addEventListener('change', toggleActionButtons);
+    els.level.addEventListener('change', toggleActionButtons);
+
+    /* --- HISTORY --- */
+    async function showHistory() {
+      els.modePlay.classList.add('hidden');
+      els.modeView.classList.add('hidden');
+      els.viewHistory.classList.remove('hidden');
+      
+      const res = await fetchJSON(`${API_URL}?type=getMyScores&email=${state.email}`);
+      els.historyBody.innerHTML = '';
+      if(res.success && res.scores.length) {
+        const sorted = res.scores.sort((a,b) => new Date(b.date) - new Date(a.date));
+        els.historyBody.innerHTML = sorted.map(s => `
+          <tr>
+            <td>${s.date}</td><td>${s.subject}</td><td>${s.score}</td><td>${s.total}</td>
+            <td><span style="padding:2px 8px; border-radius:4px; background:${s.percentage>=80?'#dcfce7':'#f1f5f9'}; font-weight:700;">${s.percentage}%</span></td>
+          </tr>`).join('');
+      } else {
+        els.historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">No history found.</td></tr>';
+      }
+    }
+    els.btnBackFilter.onclick = () => { els.viewHistory.classList.add('hidden'); };
+
+    /* --- QUIZ LOGIC --- */
+    async function getFilteredQuestions() {
+      const res = await fetchJSON(`${API_URL}?type=getMCQs`);
+      // Handle nested 'data' structure
+      const all = (res.data && res.data.mcqs) ? res.data.mcqs : (res.mcqs || []); 
+      const fac = els.faculty.value, lvl = els.level.value;
+      return all.filter(q => q.subject === fac && (lvl ? q.college === lvl : true));
+    }
+
+    els.btnPlay.onclick = async () => {
+      const qs = await getFilteredQuestions(); 
+      if (!qs.length) return showToast("No questions found.", "error");
+      
+      state.mcqs = qs; state.currentQIndex = 0; state.answers = {}; state.score = 0;
+      state.currentFaculty = els.faculty.value; state.currentLevel = els.level.value;
+      
+      els.stepFilter.classList.remove('hidden'); 
+      els.viewHistory.classList.add('hidden');
+      els.modeView.classList.add('hidden');
+      els.modePlay.classList.remove('hidden'); 
+      
+      renderQuestion();
+      window.scrollTo(0,0);
     };
 
-    const getMCQs = async () => {
-      setLoad(UI.buttons.play, true);
-      setLoad(UI.buttons.view, true);
-      const res = await fetchJSON(`${API_URL}?type=getMCQs`);
-      const data = (res.mcqs||[]).filter(r => r.subject===UI.inputs.subject.value && (UI.inputs.college.value ? r.college===UI.inputs.college.value : true));
-      setLoad(UI.buttons.play, false, '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Start Quiz');
-      setLoad(UI.buttons.view, false, '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> View Questions');
-      return data;
+    function renderQuestion() {
+      const q = state.mcqs[state.currentQIndex];
+      if (!q) return;
+
+      const savedAns = state.answers[state.currentQIndex];
+      let html = `
+        <div class="q-stem">
+          <span style="color:var(--primary)">Q${state.currentQIndex + 1}.</span>
+          ${q.q}
+        </div>
+        <div>
+      `;
+
+      q.options.forEach((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        const isSelected = savedAns === letter;
+        const isCorrect = q.answer === letter;
+
+        let cls = "opt-item";
+        if (savedAns !== undefined) {
+          cls += " disabled"; 
+          if (isCorrect) cls += " correct";
+          if (isSelected && !isCorrect) cls += " wrong";
+        } else if (isSelected) {
+          cls += " selected";
+        }
+
+        html += `
+          <div class="${cls}" onclick="selectAnswer('${letter}')">
+            <div class="opt-marker">${letter}</div>
+            <div>${opt}</div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+
+      // Feedback Logic
+      if (savedAns !== undefined) {
+        let feedbackText = "";
+        if (savedAns === q.answer) {
+          feedbackText = "Correct answer!";
+        } else {
+          feedbackText = "Incorrect answer.";
+        }
+
+        html += `
+          <div class="feedback-box">
+            <div style="font-weight:700; margin-bottom:4px; color:var(--primary);">Explanation:</div>
+            <div style="font-size:0.95rem; color:var(--text-main);">${feedbackText}</div>
+            ${q.explanation ? `<div style="margin-top:8px; color:var(--text-muted); font-size:0.9rem; line-height:1.4;">${q.explanation}</div>` : ""}
+          </div>
+        `;
+      }
+
+      els.playArea.innerHTML = html;
+
+      const total = state.mcqs.length;
+      els.progressBar.style.width = `${((state.currentQIndex + 1) / total) * 100}%`;
+      els.qCounter.textContent = `Question ${state.currentQIndex + 1} / ${total}`;
+      els.scoreTracker.textContent = `Score: ${state.score}`;
+
+      els.btnPrev.disabled = state.currentQIndex === 0;
+      if (state.currentQIndex === total - 1) { els.btnNext.classList.add('hidden'); } 
+      else { els.btnNext.classList.remove('hidden'); els.btnNext.disabled = savedAns === undefined; }
+    }
+
+    window.selectAnswer = (letter) => {
+      const qIndex = state.currentQIndex;
+      if (state.answers[qIndex] !== undefined) return; 
+      
+      state.answers[qIndex] = letter;
+      const q = state.mcqs[qIndex];
+      
+      if (letter === q.answer) state.score++;
+      
+      renderQuestion(); 
+    };
+
+    els.btnNext.onclick = () => { if (state.currentQIndex < state.mcqs.length - 1) { state.currentQIndex++; renderQuestion(); } };
+    els.btnPrev.onclick = () => { if (state.currentQIndex > 0) { state.currentQIndex--; renderQuestion(); } };
+
+    els.btnFinish.onclick = async () => {
+      const answeredCount = Object.keys(state.answers).length;
+      const total = state.mcqs.length;
+      if (!confirm(`You have answered ${answeredCount} out of ${total} questions. Finish?`)) return;
+
+      const percentage = Math.round((state.score / total) * 100);
+      
+      // Send all details to backend
+      await fetchJSON(`${API_URL}?type=saveScore&email=${state.email}&subject=${state.currentFaculty}&college=${state.currentLevel}&total=${total}&score=${state.score}&percentage=${percentage}`);
+      
+      showHistory();
     };
 
     /* --- VIEW MODE --- */
-    UI.buttons.view.onclick = async () => {
-      state.pool = await getMCQs();
-      if(!state.pool.length) return toast('No questions found', 'error');
-      switchSec('view');
-      UI.display.list.innerHTML = state.pool.map(q => `
-        <div class="q-card">
-          <div style="font-size:0.8rem; color:var(--text-gray); font-weight:700; text-transform:uppercase; margin-bottom:8px;">${q.subject}</div>
-          <div class="q-stem">${q.q}</div>
-          <div style="margin-top:16px;">
-            ${q.options.map((o,i)=>o?`<div class="opt ${o.startsWith(q.answer+'.')?'correct':''}" style="cursor:default; opacity:${o.startsWith(q.answer+'.')?1:0.7};">${o}</div>`:'').join('')}
-          </div>
-        </div>
-      `).join('');
+    els.btnView.onclick = async () => {
+      const qs = await getFilteredQuestions(); if (!qs.length) return showToast("No questions found.", "error");
+      state.mcqs = qs; renderViewMode(); 
+      els.stepFilter.classList.remove('hidden'); els.modePlay.classList.add('hidden'); els.modeView.classList.remove('hidden'); 
     };
-    UI.buttons.back.onclick = () => switchSec('filter');
+    function renderViewMode() {
+      els.viewList.innerHTML = state.mcqs.map((q, i) => `
+        <div class="q-card" style="margin-bottom:1.5rem; padding:1.5rem; background:rgba(255,255,255,0.5); border-radius:12px;">
+          <div class="q-stem" style="font-size:1rem"><span style="color:var(--primary)">Q${i+1}.</span> ${q.q}</div>
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Faculty: <b>${q.subject}</b></div>
+          <div>${q.options.map((opt, idx) => {
+            const letter = String.fromCharCode(65+idx);
+            const isCorrect = letter === q.answer;
+            return `<div style="padding:0.5rem; ${isCorrect?'color:#166534; font-weight:600;':''}">${letter}. ${opt} ${isCorrect?'✓':''}</div>`;
+          }).join('')}</div>
+        </div>`).join('');
+    }
+    els.btnBackFilterMain.onclick = () => { els.modeView.classList.add('hidden'); };
 
-    /* --- PLAY MODE --- */
-    UI.buttons.play.onclick = async () => {
-      state.pool = await getMCQs();
-      if(!state.pool.length) return toast('No questions', 'error');
-      state.idx = 0; state.score = 0; state.answered = new Array(state.pool.length).fill(null);
-      UI.display.final.classList.add('hidden');
-      UI.display.playQ.style.display = 'block';
-      switchSec('play');
-      renderQ();
-    };
-
-    const renderQ = () => {
-      const q = state.pool[state.idx];
-      const total = state.pool.length;
-      UI.display.progText.innerText = `Question ${state.idx+1}`;
-      UI.display.scoreText.innerText = `Score: ${state.score}`;
-      UI.display.progBar.style.width = `${((state.idx)/total)*100}%`;
-
-      UI.display.playQ.innerHTML = `
-        <div style="font-size:0.85rem; color:var(--primary); font-weight:700; margin-bottom:10px;">${q.subject}</div>
-        <div class="q-stem">${q.q}</div>
-        <div class="options-grid" id="opts"></div>
-      `;
-      
-      const opts = document.getElementById('opts');
-      q.options.forEach((o,i)=>{
-        if(!o) return;
-        const el = document.createElement('div');
-        el.className = 'opt';
-        const letter = String.fromCharCode(65+i);
-        el.innerText = `${letter}. ${o.replace(letter+'. ', '')}`;
-        
-        if(state.answered[state.idx]) {
-          el.style.pointerEvents = 'none';
-          if(letter===q.answer) el.classList.add('correct');
-          else if(letter===state.answered[state.idx].selected) el.classList.add('wrong');
-        } else {
-          el.onclick = () => {
-            state.answered[state.idx] = { selected: letter };
-            const correct = (letter === q.answer);
-            if(correct) state.score++;
-            
-            // Visuals
-            if(correct) { el.classList.add('correct'); toast('Correct!', 'success'); }
-            else { 
-              el.classList.add('wrong'); 
-              Array.from(opts.children).forEach(c=>{ if(c.innerText.startsWith(q.answer)) c.classList.add('correct'); }); 
-              toast('Incorrect', 'error');
-            }
-            Array.from(opts.children).forEach(c=>c.style.pointerEvents='none');
-            
-            UI.display.scoreText.innerText = `Score: ${state.score}`;
-          };
-        }
-        opts.appendChild(el);
-      });
-
-      // Buttons
-      UI.buttons.prev.disabled = state.idx===0;
-      if(state.idx===total-1) { UI.buttons.next.classList.add('hidden'); UI.buttons.finish.classList.remove('hidden'); }
-      else { UI.buttons.next.classList.remove('hidden'); UI.buttons.finish.classList.add('hidden'); }
-    };
-
-    UI.buttons.next.onclick = () => { if(state.idx<state.pool.length-1){ state.idx++; renderQ(); } };
-    UI.buttons.prev.onclick = () => { if(state.idx>0){ state.idx--; renderQ(); } };
-    UI.buttons.finish.onclick = () => {
-      UI.display.playQ.style.display = 'none';
-      UI.buttons.next.classList.add('hidden');
-      UI.buttons.finish.classList.add('hidden');
-      UI.display.final.classList.remove('hidden');
-      UI.display.finalScore.innerText = state.score;
-      UI.display.finalMsg.innerText = (state.score/state.pool.length > 0.7) ? "Excellent performance!" : "Keep practicing!";
-      
-      if(state.score > 0) fireConfetti();
-    };
-
-    UI.buttons.restart.onclick = () => {
-      UI.display.final.classList.add('hidden');
-      UI.display.playQ.style.display = 'block';
-      state.idx=0; state.score=0; state.answered=new Array(state.pool.length).fill(null);
-      renderQ();
-    };
-
-    /* --- CONFETTI EFFECT --- */
-    const fireConfetti = () => {
-      const canvas = document.getElementById('confetti');
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const particles = [];
-      for(let i=0; i<150; i++) {
-        particles.push({
-          x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
-          color: `hsl(${Math.random()*360}, 70%, 50%)`,
-          size: Math.random() * 8 + 2, speedY: Math.random() * 3 + 2, speedX: Math.random() * 2 - 1
-        });
-      }
-      const animate = () => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        particles.forEach((p,i) => {
-          p.y += p.speedY; p.x += Math.sin(p.y/50);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-          if(p.y > canvas.height) p.y = -10;
-        });
-        requestAnimationFrame(animate);
-      };
-      animate();
-      setTimeout(() => ctx.clearRect(0,0,canvas.width,canvas.height), 4000);
-    };
   </script>
 </body>
 </html>
