@@ -3,596 +3,456 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>MCQ Master | CPREC Nepal</title>
+  <title>CPREC Assessment Portal</title>
   <style>
-    /* --- MODERN CSS VARIABLES & RESET --- */
+    /* --- STYLES --- */
     :root {
-      --primary: #6366f1; /* Indigo */
-      --primary-dark: #4f46e5;
-      --secondary: #ec4899; /* Pink */
-      --bg-gradient-start: #e0c3fc;
-      --bg-gradient-end: #8ec5fc;
-      --glass-bg: rgba(255, 255, 255, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.6);
-      --text-main: #1e293b;
-      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --white: #ffffff;
       --success: #10b981;
       --error: #ef4444;
-      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
-      --radius: 20px;
-      --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --radius: 16px;
     }
 
-    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-    
     body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       margin: 0;
-      font-family: var(--font-family);
-      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
-      position: relative;
     }
 
-    /* Ambient Background Animation Blobs */
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      z-index: -1;
-      opacity: 0.6;
-      animation: float 10s infinite ease-in-out;
-    }
-    .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #c084fc; animation-delay: 0s; }
-    .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #60a5fa; animation-delay: 2s; }
-    .blob-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: #f472b6; animation-delay: 4s; opacity: 0.4; }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(20px, -20px); }
-    }
-
-    /* --- HEADER --- */
+    /* HEADER */
     header {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--glass-border);
-      position: sticky; top: 0; z-index: 50; padding: 1rem 0;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      background: var(--white);
+      padding: 1rem 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .header-content {
-      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .brand {
-      font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .brand { font-weight: 800; font-size: 1.4rem; color: var(--primary); }
+
+    /* LAYOUT */
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+      flex: 1;
+      width: 100%;
     }
 
-    /* --- MAIN LAYOUT --- */
-    main { 
-      flex: 1; width: 100%; max-width: 1200px; margin: 2rem auto; 
-      padding: 0 1.5rem; position: relative; z-index: 10; 
-    }
-    
-    /* SIDEBAR LAYOUT CSS */
-    main.quiz-layout {
-      display: grid;
-      grid-template-columns: 300px 1fr; 
-      gap: 2rem;
-      align-items: start;
-    }
-    
-    #step-filter.sidebar-mode {
-      position: sticky;
-      top: 100px; 
-      margin-bottom: 0; 
-    }
-
-    @media (max-width: 850px) {
-      main.quiz-layout { grid-template-columns: 1fr; }
-      #step-filter.sidebar-mode { position: relative; top: 0; margin-bottom: 2rem; order: -1; }
-    }
-
-    .section-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+    .card {
+      background: var(--white);
+      padding: 30px;
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
-      animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      animation: fadeIn 0.5s ease;
     }
 
-    h2 { margin-top: 0; margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
-    label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+    /* FORM ELEMENTS */
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #64748b; }
     
-    /* --- FORM ELEMENTS --- */
-    .input-group { margin-bottom: 1.2rem; }
-    input[type="email"], input[type="text"], select {
-      width: 100%; padding: 0.8rem 1rem;
-      border: 2px solid transparent; background: rgba(255, 255, 255, 0.6);
-      border-radius: 12px; font-size: 0.95rem;
-      transition: all 0.2s; color: var(--text-main);
-    }
-    input:focus, select:focus {
-      background: #fff;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    }
-    
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
-
-    /* --- BUTTONS --- */
-    button {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white; border: none; padding: 0.8rem 1.5rem;
-      border-radius: 10px; font-weight: 600; font-size: 0.95rem;
-      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-      box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
-    }
-    button:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(99, 102, 241, 0.4); }
-    button:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    button.secondary { background: white; color: var(--text-main); border: 2px solid #e2e8f0; box-shadow: none; }
-    button.secondary:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
-
-    button.btn-finish { background: linear-gradient(135deg, var(--secondary), #db2777); box-shadow: 0 4px 10px rgba(236, 72, 153, 0.4); }
-    button.btn-finish:hover { box-shadow: 0 6px 15px rgba(236, 72, 153, 0.5); }
-
-    .actions { display: flex; gap: 0.8rem; margin-top: 1.5rem; flex-wrap: wrap; }
-
-    /* --- QUIZ UI --- */
-    .progress-container { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-bottom: 1.5rem; }
-    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.3s; }
-    
-    .q-stem { font-weight: 700; font-size: 1.15rem; margin-bottom: 1.5rem; line-height: 1.5; color: var(--text-main); }
-    
-    /* Option Styles */
-    .opt-item { 
-      display: flex; align-items: center; padding: 1rem; 
-      border: 2px solid transparent; border-radius: 12px; margin-bottom: 0.8rem; 
-      cursor: pointer; transition: all 0.2s; background: rgba(255,255,255,0.6);
-      font-weight: 500; 
-    }
-    .opt-item:hover:not(.disabled) { border-color: var(--primary); background: #fff; transform: scale(1.01); }
-    
-    .opt-marker { 
-      width: 30px; height: 30px; background: #e2e8f0; border-radius: 50%; 
-      display: flex; align-items: center; justify-content: center; 
-      margin-right: 15px; font-weight: 700; font-size: 0.85rem; color: var(--text-muted);
-      flex-shrink: 0;
-    }
-    
-    /* State Classes */
-    .opt-item.selected { border-color: var(--primary); background: #eef2ff; }
-    .opt-item.selected .opt-marker { background: var(--primary); color: white; }
-    
-    .opt-item.correct { border-color: var(--success); background: #ecfdf5; }
-    .opt-item.correct .opt-marker { background: var(--success); color: white; }
-    
-    .opt-item.wrong { border-color: var(--error); background: #fef2f2; opacity: 0.8; }
-    .opt-item.wrong .opt-marker { background: var(--error); color: white; }
-    
-    .opt-item.disabled { pointer-events: none; cursor: default; }
-
-    /* Feedback Block */
-    .feedback-box {
-      margin-top: 1.5rem;
-      padding: 1.2rem;
+    input, select {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e2e8f0;
       border-radius: 12px;
-      background: #f8fafc;
-      border-left: 5px solid var(--primary);
-      animation: slideUpFade 0.3s ease-out;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      transition: border 0.2s;
     }
+    input:focus, select:focus { border-color: var(--primary); outline: none; }
 
-    /* Navigation Bar */
-    .nav-controls { 
-      display: flex; justify-content: space-between; align-items: center; 
-      margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.05);
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s;
     }
-    .nav-controls button { flex: 1; margin: 0 0.5rem; max-width: 150px; }
-    .nav-controls .btn-finish { flex: 1.5; max-width: 250px; font-size: 1rem; }
-
-    /* --- MODALS & EXTRAS --- */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
-    .modal-box { background: white; padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: scale(0.9); transition: transform 0.3s; text-align: center; }
-    .modal-overlay.active .modal-box { transform: scale(1); }
-
-    /* History Table */
-    .history-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255,255,255,0.5); border-radius: 12px; overflow: hidden; }
-    .history-table th, .history-table td { padding: 12px 16px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .history-table th { background: rgba(255,255,255,0.8); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
-
-    /* Animations */
-    @keyframes slideUpFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    button:hover { background: var(--primary-dark); }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: #cbd5e1; cursor: not-allowed; }
     
-    .shake { animation: shake 0.3s ease-in-out; }
-    .hidden { display: none !important; } 
-    .text-center { text-align: center; }
+    button.secondary { background: white; border: 2px solid #e2e8f0; color: var(--text); }
+    button.secondary:hover { background: #f1f5f9; }
+
+    /* QUIZ UI */
+    .option-card {
+      background: #f8fafc;
+      border: 2px solid transparent;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .option-card:hover { border-color: var(--primary); background: #eef2ff; }
+    .option-card.selected { background: #e0e7ff; border-color: var(--primary); color: var(--primary-dark); }
+    .option-card.correct { background: #dcfce7; border-color: var(--success); }
+    .option-card.wrong { background: #fee2e2; border-color: var(--error); opacity: 0.7; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
+    
+    .hidden { display: none !important; }
+    
+    /* UTILS */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: white; padding: 12px 24px;
+      border-radius: 50px; font-size: 0.9rem; z-index: 200;
+    }
+    .toast.error { background: var(--error); }
+    .toast.success { background: var(--success); }
+
+    .score-box { text-align: center; padding: 20px; }
+    .score-num { font-size: 3rem; font-weight: 800; color: var(--primary); display: block; }
   </style>
 </head>
 <body>
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
 
-  <div id="toast-container"></div>
   <header>
-    <div class="header-content">
-      <div class="brand">MCQ<span>Master</span></div>
-      <div id="user-display" class="hidden" style="font-size: 0.85rem; font-weight: 600; background: white; padding: 0.4rem 1rem; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></div>
-    </div>
+    <div class="brand">CPREC Nepal</div>
+    <div id="user-badge" class="hidden" style="font-size:0.8rem; font-weight:600; background:#e0e7ff; color:var(--primary); padding:4px 12px; border-radius:20px;">Verified</div>
   </header>
 
   <main>
-    <!-- 1. Verification Step -->
-    <section id="step-verify" class="section-card">
-      <h2>👋 Welcome Back</h2>
-      <p style="margin-top:-0.5rem; color: var(--text-muted); margin-bottom: 2rem;">Please verify your email to start the quiz.</p>
-      <div class="input-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" placeholder="student@example.com" />
-      </div>
-      <button id="btn-send-code" style="width: 100%;">Send Verification Code</button>
+    <!-- 1. VERIFICATION -->
+    <section id="step-verify" class="card">
+      <h2 style="margin-top:0;">Login</h2>
+      <p style="color:#64748b; margin-bottom:20px;">Enter your college email to start.</p>
+      
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="name@cprecnepal.org" />
+      <button id="btn-send-code">Send Verification Code</button>
+      <p id="verify-msg" style="text-align:center; font-size:0.9rem; color:var(--text);"></p>
     </section>
 
-    <!-- 2. Filter Step (Dashboard / Sidebar) -->
-    <section id="step-filter" class="section-card hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-        <h2 style="font-size:1.3rem; margin:0;">📚 Setup</h2>
-        <button class="secondary" style="padding:0.4rem 1rem; font-size:0.85rem;" onclick="showHistory()">📊 History</button>
+    <!-- 2. FILTERS -->
+    <section id="step-filters" class="card hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">Select Subject</h2>
+        <button id="btn-history" class="secondary" style="width:auto; padding:8px 16px;">History</button>
       </div>
+
+      <label>Faculty / Subject</label>
+      <select id="subject"><option value="">Loading...</option></select>
       
-      <div class="row">
-        <div class="input-group">
-          <label for="faculty">Faculty</label>
-          <select id="faculty"><option value="">Loading...</option></select>
-        </div>
-        <div class="input-group">
-          <label for="level">Level</label>
-          <select id="level"><option value="">Any Level</option></select>
-        </div>
-      </div>
-      
-      <div class="actions" style="flex-direction:column;">
-        <button id="btn-play" disabled style="width:100%; margin-bottom:0.5rem;">🚀 Start Quiz</button>
-        <button id="btn-view" class="secondary" disabled style="width:100%;">👁️ View List</button>
-      </div>
+      <label>Level / College (Optional)</label>
+      <select id="college"><option value="">All Levels</option></select>
+
+      <button id="btn-start-quiz">Start Quiz</button>
     </section>
 
-    <!-- 2.5 History View -->
-    <section id="view-history" class="section-card hidden">
-      <div class="actions" style="margin-bottom: 1rem;">
-        <button id="btn-back-filter" class="secondary">← Back</button>
+    <!-- 3. QUIZ -->
+    <section id="step-quiz" class="card hidden">
+      <div style="display:flex; justify-content:space-between; color:#64748b; font-size:0.9rem; margin-bottom:15px;">
+        <span id="q-count">Q 1/10</span>
+        <span id="score-display">Score: 0</span>
       </div>
-      <h3>My History</h3>
-      <div style="overflow-x: auto;">
-        <table class="history-table">
-          <thead><tr><th>Date</th><th>Faculty</th><th>Score</th><th>Total</th><th>Result</th></tr></thead>
-          <tbody id="history-body"></tbody>
-        </table>
+      
+      <div id="question-area"></div>
+      
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button id="btn-prev" class="secondary">Prev</button>
+        <button id="btn-next" disabled>Next</button>
+        <button id="btn-finish" class="hidden" style="background:var(--success);">Finish</button>
       </div>
     </section>
 
-    <!-- 3. Play Mode -->
-    <section id="mode-play" class="section-card hidden">
-      <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
-      
-      <div style="display:flex; justify-content:space-between; margin-bottom:1rem; color:var(--text-muted); font-weight:600; font-size:0.85rem;">
-        <span id="q-counter">Q 1/10</span>
-        <span id="score-tracker" style="color:var(--primary);">Score: 0</span>
-      </div>
-      
-      <div id="play-area"></div>
-      
-      <div class="nav-controls">
-        <button id="btn-prev" class="secondary">← Prev</button>
-        <button id="btn-finish" class="btn-finish">✓ Finish</button>
-        <button id="btn-next">Next →</button>
-      </div>
+    <!-- 4. HISTORY -->
+    <section id="step-history" class="card hidden">
+      <button id="btn-back-setup" class="secondary">← Back</button>
+      <h2>Your History</h2>
+      <div id="history-list" style="max-height:300px; overflow-y:auto;"></div>
     </section>
 
-    <!-- 4. View Mode -->
-    <section id="mode-view" class="section-card hidden">
-      <div class="actions" style="margin-bottom: 1rem;"><button id="btn-back-filter-main" class="secondary">← Back to Setup</button></div>
-      <div id="view-list"></div>
+    <!-- 5. RESULT -->
+    <section id="step-result" class="card hidden">
+      <div class="score-box">
+        <h3>Quiz Completed!</h3>
+        <span class="score-num" id="final-score">0/0</span>
+        <p id="final-msg">Good Job!</p>
+      </div>
+      <button onclick="location.reload()" class="secondary">Start New Quiz</button>
     </section>
   </main>
 
-  <!-- Verification Modal -->
-  <div id="modal-overlay" class="modal-overlay">
-    <div class="modal-box">
-      <h3 class="modal-title" style="margin-top:0;">Check Inbox</h3>
-      <p style="color:var(--text-muted); margin-bottom: 1.5rem;">We sent a code to <b id="modal-email-display"></b>.</p>
-      <div class="input-group">
-        <input type="text" id="verify-code" placeholder="123456" maxlength="6" style="letter-spacing: 4px; text-align: center; font-weight: 700;" />
-      </div>
-      <button id="btn-verify" style="width:100%">Verify</button>
-      <button id="btn-cancel-modal" class="secondary" style="width:100%; margin-top:0.5rem;">Cancel</button>
+  <!-- MODAL -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal">
+      <h3>Enter Code</h3>
+      <p>We sent a 6-digit code to <span id="modal-email" style="font-weight:bold;"></span></p>
+      <input type="text" id="code-input" maxlength="6" placeholder="000000" style="text-align:center; font-size:2rem; letter-spacing:4px;" />
+      <button id="btn-verify-code">Verify</button>
+      <button id="btn-cancel" class="secondary" style="margin-top:10px;">Cancel</button>
     </div>
   </div>
 
+  <div id="toast-container"></div>
+
   <script>
-    // UPDATED API URL
+    /* 
+      ⚠️ IMPORTANT: PASTE YOUR WEB APP URL BELOW 
+    */
     const API_URL = "https://script.google.com/macros/s/AKfycbzwEvUtuaCbSQYy7gX0FI7KLweLr-7hH64re2akW0jmlm6kImRDtRCoaWJJIWH8o2JLvA/exec";
 
-    const state = { 
-      email: '', verified: false, 
-      faculties: [], levels: [], 
-      mcqs: [], 
-      currentQIndex: 0, 
-      answers: {},      
-      score: 0, 
-      currentFaculty: '', currentLevel: '' 
+    const state = {
+      email: '',
+      mcqs: [],
+      answers: {},
+      score: 0,
+      currentQ: 0
     };
 
     const $ = id => document.getElementById(id);
-    const els = {
-      email: $('email'), btnSend: $('btn-send-code'),
-      stepVerify: $('step-verify'), stepFilter: $('step-filter'), viewHistory: $('view-history'),
-      faculty: $('faculty'), level: $('level'), 
-      btnPlay: $('btn-play'), btnView: $('btn-view'),
-      modePlay: $('mode-play'), modeView: $('mode-view'),
-      playArea: $('play-area'), viewList: $('view-list'),
-      progressBar: $('progress-bar'), qCounter: $('q-counter'), scoreTracker: $('score-tracker'),
-      btnPrev: $('btn-prev'), btnNext: $('btn-next'), btnFinish: $('btn-finish'),
-      modalOverlay: $('modal-overlay'), modalEmail: $('modal-email-display'),
-      verifyCode: $('verify-code'), btnVerify: $('btn-verify'), btnCancelModal: $('btn-cancel-modal'),
-      btnBackFilter: $('btn-back-filter'), btnBackFilterMain: $('btn-back-filter-main'), 
-      historyBody: $('history-body'), userDisplay: $('user-display')
+    const UI = {
+      email: $('email'),
+      btnSend: $('btn-send-code'),
+      msg: $('verify-msg'),
+      modal: $('modal'),
+      codeInput: $('code-input'),
+      modalEmail: $('modal-email'),
+      btnVerify: $('btn-verify-code'),
+      btnCancel: $('btn-cancel'),
+      badge: $('user-badge'),
+      stepVerify: $('step-verify'),
+      stepFilters: $('step-filters'),
+      stepQuiz: $('step-quiz'),
+      stepHistory: $('step-history'),
+      stepResult: $('step-result'),
+      subjectSel: $('subject'),
+      collegeSel: $('college'),
+      btnStart: $('btn-start-quiz'),
+      qArea: $('question-area'),
+      qCount: $('q-count'),
+      score: $('score-display'),
+      prevBtn: $('btn-prev'),
+      nextBtn: $('btn-next'),
+      finishBtn: $('btn-finish'),
+      finalScore: $('final-score'),
+      finalMsg: $('final-msg'),
+      historyList: $('history-list'),
+      btnHistory: $('btn-history'),
+      btnBackSetup: $('btn-back-setup')
     };
 
-    /* --- UTILITIES --- */
-    function showToast(msg, type = 'info') {
-      const container = $('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      const icon = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
-      toast.innerHTML = `<span style="font-size:1.1rem">${icon}</span> <span style="margin-left:8px;">${msg}</span>`;
-      toast.style.cssText = "background:white; padding:1rem; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.1); border-left:5px solid " + (type==='error'?'#ef4444':type==='success'?'#10b981':'#6366f1') + "; display:flex; align-items:center; margin-bottom:10px; animation: slideUpFade 0.3s;";
-      container.appendChild(toast);
-      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
-    }
-
-    // ROBUST FETCH FOR GAS
+    /* --- UTILS --- */
     async function fetchJSON(url) {
-      try { 
-        const res = await fetch(url, { 
-          method: 'GET',
-          redirect: 'follow',
-          cache: 'no-store' 
-        });
+      try {
+        const res = await fetch(url);
         const text = await res.text();
-        // Regex to extract JSON from GAS response which might be wrapped in text/html
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) return JSON.parse(jsonMatch[0]);
-        return JSON.parse(text);
-      } catch (e) { 
-        console.error(e); showToast("Connection Error", "error"); 
-        return { success: false }; 
+        // Regex to extract JSON from Google Apps Script response
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) return JSON.parse(match[0]);
+        return { success: false, message: "Server Parse Error" };
+      } catch (e) {
+        console.error(e);
+        showToast("Connection Error", "error");
+        return { success: false };
       }
     }
 
-    /* --- AUTH --- */
-    els.btnSend.onclick = async () => {
-      const email = els.email.value.trim(); 
-      if (!email) return showToast("Enter email", "error");
-      els.btnSend.disabled = true; els.btnSend.textContent = "Sending...";
-      const res = await fetchJSON(`${API_URL}?type=sendCode&email=${encodeURIComponent(email)}`);
-      els.btnSend.disabled = false; els.btnSend.textContent = "Send Verification Code";
-      if (res.success) { state.email = email; els.modalEmail.textContent = email; els.modalOverlay.classList.add('active'); els.verifyCode.focus(); } 
-      else showToast(res.message, "error");
-    };
-
-    els.btnVerify.onclick = async () => {
-      const code = els.verifyCode.value.trim(); 
-      if (!code) return showToast("Enter code", "error");
-      els.btnVerify.disabled = true;
-      const res = await fetchJSON(`${API_URL}?type=verifyCode&email=${encodeURIComponent(state.email)}&code=${encodeURIComponent(code)}`);
-      els.btnVerify.disabled = false;
-      if (res.success) { showToast("Verified!", "success"); closeModal(); completeVerification(); } 
-      else { showToast(res.message, "error"); els.verifyCode.classList.add('shake'); setTimeout(()=>els.verifyCode.classList.remove('shake'), 500); }
-    };
-    els.btnCancelModal.onclick = closeModal; 
-    function closeModal() { els.modalOverlay.classList.remove('active'); }
-
-    function completeVerification() {
-      state.verified = true; 
-      els.stepVerify.classList.add('hidden'); 
-      els.stepFilter.classList.remove('hidden');
-      els.userDisplay.textContent = state.email; els.userDisplay.classList.remove('hidden'); 
-      document.querySelector('main').classList.add('quiz-layout');
-      els.stepFilter.classList.add('sidebar-mode');
-      loadFilters();
+    function showToast(msg, type='info') {
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
     }
+
+    /* --- AUTH --- */
+    UI.btnSend.onclick = async () => {
+      const email = UI.email.value.trim();
+      if(!email) return showToast("Enter email", "error");
+
+      UI.btnSend.disabled = true; UI.btnSend.textContent = "Sending...";
+      
+      const res = await fetchJSON(`${API_URL}?type=sendCode&email=${encodeURIComponent(email)}`);
+      
+      UI.btnSend.disabled = false; UI.btnSend.textContent = "Send Verification Code";
+
+      if(res.success) {
+        state.email = email;
+        UI.modalEmail.textContent = email;
+        UI.modal.classList.add('active');
+        UI.codeInput.value = '';
+        UI.codeInput.focus();
+      } else {
+        showToast(res.message, "error");
+      }
+    };
+
+    UI.btnVerify.onclick = async () => {
+      const code = UI.codeInput.value.trim();
+      if(!code) return showToast("Enter code", "error");
+
+      UI.btnVerify.textContent = "Verifying...";
+      
+      const res = await fetchJSON(`${API_URL}?type=verifyCode&email=${encodeURIComponent(state.email)}&code=${encodeURIComponent(code)}`);
+      
+      if(res.success) {
+        UI.modal.classList.remove('active');
+        UI.badge.classList.remove('hidden');
+        UI.stepVerify.classList.add('hidden');
+        UI.stepFilters.classList.remove('hidden');
+        loadFilters();
+      } else {
+        showToast(res.message, "error");
+        UI.btnVerify.textContent = "Verify";
+        UI.codeInput.value = ''; // Clear on error
+      }
+    };
+
+    UI.btnCancel.onclick = () => UI.modal.classList.remove('active');
 
     /* --- FILTERS --- */
     async function loadFilters() {
       const res = await fetchJSON(`${API_URL}?type=getFilters`);
-      if (res.success) {
-        // Handle nested 'data' structure from backend
-        const payload = res.data || res;
-        state.faculties = payload.subjects || []; 
-        state.levels = payload.colleges || []; 
-        els.faculty.innerHTML = '<option value="">Select Faculty...</option>' + state.faculties.map(s => `<option value="${s}">${s}</option>`).join('');
-        els.level.innerHTML = '<option value="">Any Level</option>' + state.levels.map(c => `<option value="${c}">${c}</option>`).join('');
+      if(res.success) {
+        const data = res.data; // { subjects, colleges }
+        UI.subjectSel.innerHTML = '<option value="">Select Faculty...</option>' + data.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+        UI.collegeSel.innerHTML = '<option value="">Any Level</option>' + data.colleges.map(c => `<option value="${c}">${c}</option>`).join('');
       }
     }
 
-    function toggleActionButtons() { const ok = !!els.faculty.value; els.btnPlay.disabled = !ok; els.btnView.disabled = !ok; }
-    els.faculty.addEventListener('change', toggleActionButtons);
-    els.level.addEventListener('change', toggleActionButtons);
+    UI.btnStart.onclick = async () => {
+      const subj = UI.subjectSel.value;
+      if(!subj) return showToast("Select a Faculty", "error");
 
-    /* --- HISTORY --- */
-    async function showHistory() {
-      els.modePlay.classList.add('hidden');
-      els.modeView.classList.add('hidden');
-      els.viewHistory.classList.remove('hidden');
-      
-      const res = await fetchJSON(`${API_URL}?type=getMyScores&email=${state.email}`);
-      els.historyBody.innerHTML = '';
-      if(res.success && res.scores.length) {
-        const sorted = res.scores.sort((a,b) => new Date(b.date) - new Date(a.date));
-        els.historyBody.innerHTML = sorted.map(s => `
-          <tr>
-            <td>${s.date}</td><td>${s.subject}</td><td>${s.score}</td><td>${s.total}</td>
-            <td><span style="padding:2px 8px; border-radius:4px; background:${s.percentage>=80?'#dcfce7':'#f1f5f9'}; font-weight:700;">${s.percentage}%</span></td>
-          </tr>`).join('');
-      } else {
-        els.historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">No history found.</td></tr>';
-      }
-    }
-    els.btnBackFilter.onclick = () => { els.viewHistory.classList.add('hidden'); };
-
-    /* --- QUIZ LOGIC --- */
-    async function getFilteredQuestions() {
       const res = await fetchJSON(`${API_URL}?type=getMCQs`);
-      // Handle nested 'data' structure
-      const all = (res.data && res.data.mcqs) ? res.data.mcqs : (res.mcqs || []); 
-      const fac = els.faculty.value, lvl = els.level.value;
-      return all.filter(q => q.subject === fac && (lvl ? q.college === lvl : true));
-    }
-
-    els.btnPlay.onclick = async () => {
-      const qs = await getFilteredQuestions(); 
-      if (!qs.length) return showToast("No questions found.", "error");
-      
-      state.mcqs = qs; state.currentQIndex = 0; state.answers = {}; state.score = 0;
-      state.currentFaculty = els.faculty.value; state.currentLevel = els.level.value;
-      
-      els.stepFilter.classList.remove('hidden'); 
-      els.viewHistory.classList.add('hidden');
-      els.modeView.classList.add('hidden');
-      els.modePlay.classList.remove('hidden'); 
-      
-      renderQuestion();
-      window.scrollTo(0,0);
+      if(res.success) {
+        const all = res.data.mcqs;
+        const col = UI.collegeSel.value;
+        
+        state.mcqs = all.filter(q => q.subject === subj && (col ? q.college === col : true));
+        
+        if(state.mcqs.length === 0) return showToast("No questions found", "error");
+        
+        startQuiz();
+      }
     };
 
-    function renderQuestion() {
-      const q = state.mcqs[state.currentQIndex];
-      if (!q) return;
+    /* --- QUIZ --- */
+    function startQuiz() {
+      state.currentQ = 0;
+      state.answers = {};
+      state.score = 0;
+      
+      UI.stepFilters.classList.add('hidden');
+      UI.stepHistory.classList.add('hidden');
+      UI.stepResult.classList.add('hidden');
+      UI.stepQuiz.classList.remove('hidden');
+      
+      renderQ();
+    }
 
-      const savedAns = state.answers[state.currentQIndex];
-      let html = `
-        <div class="q-stem">
-          <span style="color:var(--primary)">Q${state.currentQIndex + 1}.</span>
-          ${q.q}
-        </div>
-        <div>
-      `;
+    function renderQ() {
+      const q = state.mcqs[state.currentQ];
+      const saved = state.answers[state.currentQ];
 
+      // HTML
+      let html = `<h3 style="margin:0 0 20px 0;">${state.currentQ + 1}. ${q.q}</h3>`;
+      
       q.options.forEach((opt, i) => {
-        const letter = String.fromCharCode(65 + i);
-        const isSelected = savedAns === letter;
+        const letter = String.fromCharCode(65+i);
+        const isSelected = saved === letter;
         const isCorrect = q.answer === letter;
-
-        let cls = "opt-item";
-        if (savedAns !== undefined) {
-          cls += " disabled"; 
-          if (isCorrect) cls += " correct";
-          if (isSelected && !isCorrect) cls += " wrong";
-        } else if (isSelected) {
+        
+        let cls = "option-card";
+        if(saved !== undefined) {
+          cls += " disabled";
+          if(isCorrect) cls += " correct";
+          if(isSelected && !isCorrect) cls += " wrong";
+        } else if(isSelected) {
           cls += " selected";
         }
 
-        html += `
-          <div class="${cls}" onclick="selectAnswer('${letter}')">
-            <div class="opt-marker">${letter}</div>
-            <div>${opt}</div>
-          </div>
-        `;
+        html += `<div class="${cls}" onclick="selectOpt('${letter}')">
+          <b>${letter}.</b> ${opt}
+        </div>`;
       });
 
-      html += `</div>`;
-
-      // Feedback Logic
-      if (savedAns !== undefined) {
-        let feedbackText = "";
-        if (savedAns === q.answer) {
-          feedbackText = "Correct answer!";
-        } else {
-          feedbackText = "Incorrect answer.";
-        }
-
-        html += `
-          <div class="feedback-box">
-            <div style="font-weight:700; margin-bottom:4px; color:var(--primary);">Explanation:</div>
-            <div style="font-size:0.95rem; color:var(--text-main);">${feedbackText}</div>
-            ${q.explanation ? `<div style="margin-top:8px; color:var(--text-muted); font-size:0.9rem; line-height:1.4;">${q.explanation}</div>` : ""}
-          </div>
-        `;
+      UI.qArea.innerHTML = html;
+      UI.qCount.textContent = `Q ${state.currentQ + 1}/${state.mcqs.length}`;
+      UI.score.textContent = `Score: ${state.score}`;
+      
+      UI.prevBtn.disabled = state.currentQ === 0;
+      UI.nextBtn.disabled = saved === undefined;
+      
+      if(state.currentQ === state.mcqs.length - 1) {
+        UI.nextBtn.classList.add('hidden');
+        UI.finishBtn.classList.remove('hidden');
+        UI.finishBtn.disabled = saved === undefined;
+      } else {
+        UI.nextBtn.classList.remove('hidden');
+        UI.finishBtn.classList.add('hidden');
       }
-
-      els.playArea.innerHTML = html;
-
-      const total = state.mcqs.length;
-      els.progressBar.style.width = `${((state.currentQIndex + 1) / total) * 100}%`;
-      els.qCounter.textContent = `Question ${state.currentQIndex + 1} / ${total}`;
-      els.scoreTracker.textContent = `Score: ${state.score}`;
-
-      els.btnPrev.disabled = state.currentQIndex === 0;
-      if (state.currentQIndex === total - 1) { els.btnNext.classList.add('hidden'); } 
-      else { els.btnNext.classList.remove('hidden'); els.btnNext.disabled = savedAns === undefined; }
     }
 
-    window.selectAnswer = (letter) => {
-      const qIndex = state.currentQIndex;
-      if (state.answers[qIndex] !== undefined) return; 
-      
-      state.answers[qIndex] = letter;
-      const q = state.mcqs[qIndex];
-      
-      if (letter === q.answer) state.score++;
-      
-      renderQuestion(); 
+    window.selectOpt = (letter) => {
+      if(state.answers[state.currentQ] !== undefined) return; // Already answered
+      state.answers[state.currentQ] = letter;
+      const q = state.mcqs[state.currentQ];
+      if(letter === q.answer) state.score++;
+      renderQ();
     };
 
-    els.btnNext.onclick = () => { if (state.currentQIndex < state.mcqs.length - 1) { state.currentQIndex++; renderQuestion(); } };
-    els.btnPrev.onclick = () => { if (state.currentQIndex > 0) { state.currentQIndex--; renderQuestion(); } };
-
-    els.btnFinish.onclick = async () => {
-      const answeredCount = Object.keys(state.answers).length;
-      const total = state.mcqs.length;
-      if (!confirm(`You have answered ${answeredCount} out of ${total} questions. Finish?`)) return;
-
-      const percentage = Math.round((state.score / total) * 100);
+    UI.prevBtn.onclick = () => { if(state.currentQ > 0) { state.currentQ--; renderQ(); } };
+    UI.nextBtn.onclick = () => { if(state.currentQ < state.mcqs.length - 1) { state.currentQ++; renderQ(); } };
+    
+    UI.finishBtn.onclick = async () => {
+      // Save to Backend
+      await fetchJSON(`${API_URL}?type=saveScore&email=${state.email}&subject=${UI.subjectSel.value}&score=${state.score}&total=${state.mcqs.length}&percentage=${Math.round((state.score/state.mcqs.length)*100)}`);
       
-      // Send all details to backend
-      await fetchJSON(`${API_URL}?type=saveScore&email=${state.email}&subject=${state.currentFaculty}&college=${state.currentLevel}&total=${total}&score=${state.score}&percentage=${percentage}`);
-      
-      showHistory();
+      UI.stepQuiz.classList.add('hidden');
+      UI.stepResult.classList.remove('hidden');
+      UI.finalScore.textContent = `${state.score}/${state.mcqs.length}`;
     };
 
-    /* --- VIEW MODE --- */
-    els.btnView.onclick = async () => {
-      const qs = await getFilteredQuestions(); if (!qs.length) return showToast("No questions found.", "error");
-      state.mcqs = qs; renderViewMode(); 
-      els.stepFilter.classList.remove('hidden'); els.modePlay.classList.add('hidden'); els.modeView.classList.remove('hidden'); 
+    /* --- HISTORY --- */
+    UI.btnHistory.onclick = async () => {
+      UI.stepFilters.classList.add('hidden');
+      UI.stepHistory.classList.remove('hidden');
+      
+      const res = await fetchJSON(`${API_URL}?type=getMyScores&email=${state.email}`);
+      if(res.success) {
+        UI.historyList.innerHTML = res.scores.length 
+          ? res.scores.map(s => `
+            <div style="padding:10px; border-bottom:1px solid #eee; font-size:0.9rem;">
+              <b>${s.date}</b> - ${s.subject}<br>
+              Score: ${s.score}/${s.total} (${s.percentage}%)
+            </div>`).join('')
+          : "<p>No history.</p>";
+      }
     };
-    function renderViewMode() {
-      els.viewList.innerHTML = state.mcqs.map((q, i) => `
-        <div class="q-card" style="margin-bottom:1.5rem; padding:1.5rem; background:rgba(255,255,255,0.5); border-radius:12px;">
-          <div class="q-stem" style="font-size:1rem"><span style="color:var(--primary)">Q${i+1}.</span> ${q.q}</div>
-          <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Faculty: <b>${q.subject}</b></div>
-          <div>${q.options.map((opt, idx) => {
-            const letter = String.fromCharCode(65+idx);
-            const isCorrect = letter === q.answer;
-            return `<div style="padding:0.5rem; ${isCorrect?'color:#166534; font-weight:600;':''}">${letter}. ${opt} ${isCorrect?'✓':''}</div>`;
-          }).join('')}</div>
-        </div>`).join('');
-    }
-    els.btnBackFilterMain.onclick = () => { els.modeView.classList.add('hidden'); };
+    UI.btnBackSetup.onclick = () => {
+      UI.stepHistory.classList.add('hidden');
+      UI.stepFilters.classList.remove('hidden');
+    };
 
   </script>
 </body>
