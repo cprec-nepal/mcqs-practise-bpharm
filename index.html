@@ -3,194 +3,247 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>CPREC Assessment Portal</title>
+  <title>CPREC Assessment Pro</title>
   <style>
-    /* --- VARIABLES & RESET --- */
+    /* --- MODERN VARIABLES --- */
     :root {
       --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --bg-body: #f1f5f9;
-      --white: #ffffff;
+      --primary-glow: rgba(79, 70, 229, 0.3);
+      --primary-light: #818cf8;
+      --bg-grad-start: #eff6ff;
+      --bg-grad-end: #e0e7ff;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.5);
       --text-main: #1e293b;
       --text-muted: #64748b;
-      --border: #e2e8f0;
-      --radius: 16px;
-      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --success: #10b981;
+      --error: #ef4444;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      --radius: 20px;
     }
 
+    /* --- RESET & BODY --- */
+    * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+    
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg-body);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
+      background-size: 200% 200%;
       color: var(--text-main);
       margin: 0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      animation: bgShift 15s ease infinite;
+      overflow-x: hidden;
     }
+
+    /* --- ANIMATIONS --- */
+    @keyframes bgShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pop { 0% { transform: scale(0.95); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+    .animate-enter { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .animate-slide { animation: slideIn 0.4s ease-out forwards; }
 
     /* --- LOGIN SCREEN --- */
     #login-screen {
       position: fixed; inset: 0; z-index: 1000;
-      background: var(--bg-body);
+      background: linear-gradient(135deg, #6366f1, #a855f7);
       display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s;
     }
+    #login-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    
     .login-card {
-      background: var(--white); padding: 40px; border-radius: var(--radius);
-      width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-      text-align: center;
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+      padding: 40px; border-radius: 30px; width: 90%; max-width: 420px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      text-align: center; transform: scale(1);
     }
 
-    /* --- DASHBOARD GRID --- */
+    /* --- DASHBOARD LAYOUT --- */
     #dashboard-container {
-      display: none; /* Hidden until login */
-      flex: 1;
-      display: flex; /* Default hidden, shown via JS */
-      max-width: 1400px; margin: 0 auto; width: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-      gap: 20px;
+      display: none; flex: 1; width: 100%; max-width: 1400px; margin: 0 auto;
+      padding: 30px; gap: 30px; align-items: flex-start;
     }
+    #dashboard-container.active { display: flex; }
 
-    /* Sidebar (Left) */
+    /* SIDEBAR */
     aside {
-      width: 300px;
-      flex-shrink: 0;
-      background: var(--white);
-      padding: 24px;
-      border-radius: var(--radius);
-      height: fit-content;
-      box-shadow: var(--shadow);
-      display: flex; flex-direction: column; gap: 20px;
+      width: 300px; flex-shrink: 0;
+      background: var(--glass-bg); backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      padding: 24px; border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      position: sticky; top: 30px;
+      transition: transform 0.3s ease;
     }
 
-    /* Main Content (Right) */
+    /* MAIN CONTENT */
     main {
-      flex: 1;
-      background: var(--white);
-      padding: 30px;
+      flex: 1; min-height: 500px;
+      background: var(--glass-bg); backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      min-height: 500px;
-      position: relative;
+      box-shadow: var(--shadow-lg);
+      padding: 40px; position: relative;
+      overflow: hidden;
+      transition: opacity 0.2s ease;
     }
 
-    /* Responsive */
+    /* Mobile Layout */
     @media (max-width: 768px) {
-      #dashboard-container { flex-direction: column; }
-      aside { width: 100%; }
+      #dashboard-container { flex-direction: column; padding: 15px; }
+      aside { width: 100%; position: relative; top: 0; }
+      main { padding: 20px; }
     }
 
     /* --- ELEMENTS --- */
-    h2, h3 { margin: 0 0 15px 0; color: var(--text-main); }
-    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+    h2, h3 { margin: 0 0 15px 0; color: var(--text-main); letter-spacing: -0.02em; }
+    
+    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
     
     select {
-      width: 100%; padding: 12px; border: 2px solid var(--border);
-      border-radius: 10px; font-size: 0.95rem; margin-bottom: 15px;
-      background: #fff;
+      width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0;
+      border-radius: 14px; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px;
+      background: #fff; transition: all 0.2s; color: var(--text-main);
     }
-    select:focus { border-color: var(--primary); outline: none; }
+    select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); transform: translateY(-2px); }
 
+    /* BUTTONS */
     button {
-      width: 100%; padding: 12px; border: none; border-radius: 10px;
-      font-weight: 600; font-size: 1rem; cursor: pointer;
-      transition: all 0.2s; margin-bottom: 10px;
+      width: 100%; padding: 14px; border: none; border-radius: 12px;
+      font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
+    button:active { transform: scale(0.96); }
     
-    button.primary { background: var(--primary); color: white; }
-    button.primary:hover:not(:disabled) { background: var(--primary-hover); }
+    button.primary { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary-glow); }
+    button.primary:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow); }
     
-    button.secondary { background: white; border: 2px solid var(--border); color: var(--text-main); }
+    button.secondary { background: white; border: 2px solid #e2e8f0; color: var(--text-main); }
     button.secondary:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
     
-    button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    /* Quiz UI */
-    .q-stem { font-size: 1.25rem; font-weight: 700; line-height: 1.5; margin-bottom: 20px; }
-    .opt {
-      padding: 15px; border: 2px solid var(--border); border-radius: 12px;
-      margin-bottom: 10px; cursor: pointer; font-weight: 500;
-      transition: 0.2s;
-    }
-    .opt:hover:not(.disabled) { border-color: var(--primary); background: #e0e7ff; }
-    .opt.selected { background: #e0e7ff; border-color: var(--primary); }
-    .opt.correct { background: #dcfce7; border-color: #10b981; color: #064e3b; }
-    .opt.wrong { background: #fee2e2; border-color: #ef4444; opacity: 0.7; }
-    .opt.disabled { pointer-events: none; }
-
-    /* Result & History */
-    .score-big { font-size: 4rem; font-weight: 800; color: var(--primary); display: block; margin: 20px 0; }
-    .history-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+    /* QUIZ UI */
+    .q-stem { font-size: 1.4rem; font-weight: 700; line-height: 1.4; margin-bottom: 24px; color: var(--text-main); }
     
-    /* Utility */
+    .opt {
+      padding: 18px 24px; border: 2px solid #e2e8f0; border-radius: 16px;
+      margin-bottom: 12px; cursor: pointer; font-weight: 600; font-size: 1rem;
+      transition: all 0.2s; background: rgba(255,255,255,0.6);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .opt:hover:not(.disabled) { border-color: var(--primary); background: #eef2ff; transform: translateX(8px); }
+    
+    .opt-letter { width: 36px; height: 36px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--text-muted); transition: 0.3s; }
+    
+    .opt.selected { background: #e0e7ff; border-color: var(--primary); box-shadow: 0 4px 12px var(--primary-glow); }
+    .opt.selected .opt-letter { background: var(--primary); color: white; }
+    
+    .opt.correct { background: #dcfce7; border-color: var(--success); opacity: 1 !important; transform: scale(1); }
+    .opt.correct .opt-letter { background: var(--success); color: white; animation: pop 0.4s; }
+    
+    .opt.wrong { background: #fee2e2; border-color: var(--error); opacity: 0.6; pointer-events: none; }
+    
+    /* PROGRESS */
+    .progress-track { height: 6px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    /* UTILS */
     .hidden { display: none !important; }
-    .badge { background: #e0e7ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
-
-    /* Login Modal */
+    .badge { background: #e0e7ff; color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    
+    /* MODAL */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      display: none; align-items: center; justify-content: center; z-index: 2000;
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; z-index: 2000;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-content {
-      background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center;
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: white; padding: 40px; border-radius: 24px; width: 90%; max-width: 400px;
+      text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+      transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    input[type="email"], input[type="text"] {
-      width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; margin-bottom: 15px;
+    .modal-overlay.active .modal-box { transform: scale(1); }
+    
+    input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 1rem; margin-bottom: 15px; }
+    input:focus { border-color: var(--primary); outline: none; }
+
+    /* History Items */
+    .history-card {
+      background: white; padding: 16px; border-radius: 12px; margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
+      display: flex; justify-content: space-between; align-items: center;
     }
 
+    /* Confetti Canvas */
+    #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
   </style>
 </head>
 <body>
 
+  <!-- Background Canvas for Particles -->
+  <div id="confetti"></div>
+
   <!-- 1. LOGIN SCREEN -->
   <div id="login-screen">
-    <div class="login-card">
-      <h2 style="color:var(--primary);">CPREC Nepal</h2>
-      <p style="color:var(--text-muted);">Assessment Portal</p>
-      <button onclick="openLoginModal()" style="margin-top:20px;">Login with Email</button>
+    <div class="login-card animate-enter">
+      <h1 style="color:var(--primary); font-size:2.5rem; margin-bottom:10px;">CPREC</h1>
+      <p style="color:var(--text-muted); margin-top:0;">Assessment Portal</p>
+      <button onclick="openLoginModal()" style="margin-top:30px; padding:16px;">Login with Email</button>
     </div>
   </div>
 
-  <!-- 2. DASHBOARD (Sidebar + Main) -->
-  <div id="dashboard-container" class="hidden">
+  <!-- 2. DASHBOARD -->
+  <div id="dashboard-container">
     
-    <!-- LEFT SIDEBAR -->
-    <aside>
-      <div style="text-align:center; margin-bottom:10px;">
-        <div id="user-email-display" style="font-weight:700;">user@cprec.org</div>
-        <div class="badge">Verified</div>
+    <!-- SIDEBAR -->
+    <aside class="animate-enter">
+      <div style="text-align:center; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--glass-border);">
+        <div id="user-email-display" style="font-weight:800; font-size:1.1rem;">user@cprec.org</div>
+        <div class="badge" style="margin-top:8px; display:inline-block;">Verified</div>
       </div>
-      <hr style="border:0; border-top:1px solid var(--border); width:100%; margin:10px 0;">
 
-      <!-- FILTERS -->
       <div>
         <label>Faculty / Subject <span style="color:red">*</span></label>
-        <select id="subject-filter">
+        <select id="subject-filter" onchange="handleFacultyChange()">
           <option value="">Select Faculty...</option>
         </select>
 
         <label>Level / College</label>
-        <select id="college-filter">
+        <select id="college-filter" onchange="checkButtons()">
           <option value="">Any Level</option>
         </select>
       </div>
 
-      <!-- ACTIONS -->
-      <div style="margin-top:auto;">
-        <button id="btn-start-quiz" class="primary" disabled>🚀 Start Quiz</button>
-        <button id="btn-view-questions" class="secondary" disabled>👁️ View Questions</button>
-        <button id="btn-view-history" class="secondary">📊 My History</button>
-        <button onclick="logout()" class="secondary" style="margin-top:20px; border-color: #ef4444; color:#ef4444;">Logout</button>
+      <div style="margin-top:30px; display:flex; flex-direction:column; gap:10px;">
+        <button id="btn-start-quiz" class="primary" disabled onclick="startQuiz()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12z"/></svg> Start Quiz
+        </button>
+        <button id="btn-view-questions" class="secondary" disabled onclick="viewQuestions()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View Questions
+        </button>
+        <button id="btn-view-history" class="secondary" onclick="viewHistory()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> My History
+        </button>
+        <button onclick="logout()" class="secondary" style="border-color:#fee2e2; color:#ef4444; margin-top:20px;">Logout</button>
       </div>
     </aside>
 
-    <!-- RIGHT MAIN CONTENT -->
+    <!-- MAIN CONTENT -->
     <main id="main-display">
-      <!-- Content injected by JS (Quiz, Result, History, List) -->
-      <div style="text-align:center; margin-top:100px; color:var(--text-muted);">
-        <h3>Welcome</h3>
-        <p>Select a Faculty from the sidebar to begin.</p>
+      <!-- Content injected via JS -->
+      <div class="text-center" style="text-align:center; margin-top:100px; color:var(--text-muted);">
+        <h2>Welcome</h2>
+        <p>Select a Faculty to begin your assessment.</p>
       </div>
     </main>
 
@@ -198,26 +251,29 @@
 
   <!-- LOGIN MODAL -->
   <div id="login-modal" class="modal-overlay">
-    <div class="modal-content">
-      <h3>Verify Email</h3>
-      <p id="login-status" style="font-size:0.9rem; color:var(--text-muted);"></p>
-      <input type="email" id="email-input" placeholder="Enter email" />
+    <div class="modal-box">
+      <h3 style="margin:0 0 10px 0;">Secure Login</h3>
+      <p id="login-status" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:20px;"></p>
+      <input type="email" id="email-input" placeholder="Enter your email" />
       <button onclick="sendCode()" class="primary" id="btn-send">Send Code</button>
       <div id="verify-step" class="hidden">
-        <input type="text" id="code-input" placeholder="6-digit code" maxlength="6" style="text-align:center; font-size:1.2rem; letter-spacing:2px;" />
+        <input type="text" id="code-input" placeholder="000000" maxlength="6" style="text-align:center; font-size:1.5rem; letter-spacing:4px;" />
         <button onclick="verifyCode()" class="primary" id="btn-verify">Verify Login</button>
-        <button onclick="closeLoginModal()" class="secondary">Cancel</button>
+        <button onclick="closeLoginModal()" class="secondary" style="margin-top:10px;">Cancel</button>
       </div>
     </div>
   </div>
 
   <script>
     // CONFIG
-    // ⚠️ REPLACE WITH YOUR WEB APP URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbzwEvUtuaCbSQYy7gX0FI7KLweLr-7hH64re2akW0jmlm6kImRDtRCoaWJJIWH8o2JLvA/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbzwEvUtuaCbSQYy7gX0FI7KLweLr-7hH64re2akW0jmlm6kImRDtRCoaWJJIWH8o2JLvA/exec";
 
     const state = {
       email: '',
+      // CACHING: Store questions locally to make switching instant
+      questionsCache: {}, 
+      currentFaculty: '',
+      currentLevel: '',
       mcqs: [],
       answers: {},
       score: 0,
@@ -226,34 +282,20 @@
     };
 
     const $ = id => document.getElementById(id);
-    
-    /* --- INITIALIZATION --- */
-    window.onload = () => {
-      // Check local storage for session? (Optional simple persistence)
-      const savedEmail = localStorage.getItem('cprec_email');
-      if(savedEmail) {
-        // Bypass login for demo, or force re-login? 
-        // Let's force re-login for security simplicity in this version
-      }
-    };
 
-    /* --- AUTH LOGIC --- */
-    function openLoginModal() {
-      $('login-modal').classList.add('active');
-      $('email-input').focus();
-    }
-    function closeLoginModal() {
-      $('login-modal').classList.remove('active');
+    /* --- AUTH --- */
+    function openLoginModal() { $('login-modal').classList.add('active'); $('email-input').focus(); }
+    function closeLoginModal() { 
+      $('login-modal').classList.remove('active'); 
       $('verify-step').classList.add('hidden');
       $('btn-send').classList.remove('hidden');
-      $('code-input').value = '';
     }
 
     async function sendCode() {
       const email = $('email-input').value.trim();
       if(!email) return alert('Enter email');
       
-      $('login-status').textContent = "Sending...";
+      $('login-status').textContent = "Sending code...";
       const res = await fetchAPI(`?type=sendCode&email=${encodeURIComponent(email)}`);
       
       if(res.success) {
@@ -275,6 +317,7 @@
       const res = await fetchAPI(`?type=verifyCode&email=${encodeURIComponent(state.email)}&code=${encodeURIComponent(code)}`);
       
       if(res.success) {
+        closeLoginModal();
         enterDashboard();
       } else {
         alert("Invalid Code: " + res.message);
@@ -283,22 +326,16 @@
 
     function enterDashboard() {
       $('login-screen').classList.add('hidden');
-      $('dashboard-container').classList.remove('hidden');
-      $('dashboard-container').style.display = 'flex'; // Force flex
+      $('dashboard-container').classList.add('active');
+      $('dashboard-container').style.display = 'flex';
       $('user-email-display').textContent = state.email;
       
-      // Load Filters immediately
       loadFilters();
     }
 
-    function logout() {
-      if(confirm("Log out?")) {
-        localStorage.removeItem('cprec_email');
-        location.reload();
-      }
-    }
+    function logout() { if(confirm("Logout?")) location.reload(); }
 
-    /* --- FILTERS & STATE --- */
+    /* --- DATA & CACHING (SPEED OPTIMIZATION) --- */
     async function loadFilters() {
       const res = await fetchAPI('?type=getFilters');
       if(res.success) {
@@ -308,183 +345,191 @@
       }
     }
 
-    function checkFilters() {
-      const subj = $('subject-filter').value;
-      const hasSubject = subj !== "";
-      
-      // Enable/Disable buttons based on filter selection
-      $('btn-start-quiz').disabled = !hasSubject;
-      $('btn-view-questions').disabled = !hasSubject;
-
-      // If subject changed while playing, reset view
-      if(state.isQuizRunning && hasSubject) {
-         // Optionally reset if filters change
+    // When Faculty changes, Fetch & Cache MCQs
+    async function handleFacultyChange() {
+      const faculty = $('subject-filter').value;
+      if(!faculty) {
+        state.currentFaculty = '';
+        checkButtons();
+        return;
       }
+
+      // Show loading state in main area
+      $('main-display').innerHTML = `<div style="text-align:center; padding:50px;"><div style="font-size:2rem; margin:0 auto; width:40px; height:40px; border:4px solid var(--primary); border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div><p style="margin-top:20px; color:var(--text-muted);">Loading questions...</p></div>`;
+      
+      state.currentFaculty = faculty;
+
+      // Check cache first
+      if(state.questionsCache[faculty]) {
+        state.mcqs = state.questionsCache[faculty];
+        $('main-display').innerHTML = `<div class="text-center animate-enter"><h2>Ready</h2><p>${state.mcqs.length} questions loaded for ${faculty}.</p></div>`;
+      } else {
+        const res = await fetchAPI('?type=getMCQs');
+        if(res.success) {
+          // Filter only this faculty
+          const all = res.data.mcqs;
+          const filtered = all.filter(q => q.subject === faculty);
+          
+          // Cache it
+          state.questionsCache[faculty] = filtered;
+          state.mcqs = filtered;
+          
+          $('main-display').innerHTML = `<div class="text-center animate-enter"><h2>Ready</h2><p>${filtered.length} questions loaded for ${faculty}.</p></div>`;
+        }
+      }
+      checkButtons();
     }
 
-    $('subject-filter').addEventListener('change', checkFilters);
-    $('college-filter').addEventListener('change', checkFilters);
+    function checkButtons() {
+      const hasFaculty = !!$('subject-filter').value;
+      $('btn-start-quiz').disabled = !hasFaculty;
+      $('btn-view-questions').disabled = !hasFaculty;
+    }
 
     /* --- QUIZ LOGIC --- */
-    $('btn-start-quiz').onclick = async () => {
-      const subj = $('subject-filter').value;
-      const col = $('college-filter').value;
+    function startQuiz() {
+      state.currentQ = 0;
+      state.score = 0;
+      state.answers = {};
+      state.isQuizRunning = true;
+      
+      // Filter again by college just in case
+      const level = $('college-filter').value;
+      const pool = level ? state.mcqs.filter(q => q.college === level) : state.mcqs;
+      
+      if(pool.length === 0) return alert("No questions found for this level.");
+      
+      state.mcqs = pool; // Set active pool
+      renderQuiz();
+    }
 
-      // 1. Fetch Questions
-      const res = await fetchAPI('?type=getMCQs');
-      if(res.success) {
-        const all = res.data.mcqs;
-        state.mcqs = all.filter(q => q.subject === subj && (col ? q.college === col : true));
-        
-        if(state.mcqs.length === 0) return alert("No questions found for this selection.");
-
-        // 2. Reset State
-        state.currentQ = 0;
-        state.score = 0;
-        state.answers = {};
-        state.isQuizRunning = true;
-
-        // 3. Render
-        renderQuizUI();
-      }
-    };
-
-    function renderQuizUI() {
+    function renderQuiz() {
       const q = state.mcqs[state.currentQ];
       const saved = state.answers[state.currentQ];
       
-      // Header
-      let html = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;">
-          <span style="font-weight:700; color:var(--primary);">Q ${state.currentQ + 1}/${state.mcqs.length}</span>
-          <span style="font-weight:700;">Score: ${state.score}</span>
-        </div>
-        <div class="q-stem">${q.q}</div>
-      `;
-
-      // Options
-      q.options.forEach((opt, i) => {
-        const letter = String.fromCharCode(65+i);
-        const isSelected = saved === letter;
-        const isCorrect = q.answer === letter;
-
-        let cls = "opt";
-        if(saved !== undefined) {
-          cls += " disabled";
-          if(isCorrect) cls += " correct";
-          if(isSelected && !isCorrect) cls += " wrong";
-        } else if (isSelected) {
-          cls += " selected";
-        }
-
-        html += `<div class="${cls}" onclick="selectAnswer('${letter}')"><b>${letter}.</b> ${opt}</div>`;
-      });
-
-      // Navigation
-      const prevBtn = `<button onclick="navQ(-1)" class="secondary" ${state.currentQ===0?'disabled':''}>Previous</button>`;
-      const nextBtn = `<button onclick="navQ(1)" class="primary" ${saved===undefined?'disabled':''}>Next</button>`;
-      const finishBtn = `<button onclick="finishQuiz()" class="primary" style="background:#10b981;" ${saved===undefined?'disabled':''}>Finish Quiz</button>`;
-
-      const isLast = state.currentQ === state.mcqs.length - 1;
+      // Fade effect
+      const main = $('main-display');
+      main.style.opacity = '0';
       
-      html += `
-        <div style="display:flex; gap:10px; margin-top:30px;">
-          ${prevBtn}
-          ${isLast ? finishBtn : nextBtn}
-        </div>
-      `;
+      setTimeout(() => {
+        let html = `
+          <div class="progress-track"><div class="progress-fill" style="width:${((state.currentQ)/state.mcqs.length)*100}%"></div></div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px;">
+            <span class="badge" style="font-size:1rem;">Q ${state.currentQ + 1} / ${state.mcqs.length}</span>
+            <span style="font-weight:800; color:var(--primary); font-size:1.2rem;">Score: ${state.score}</span>
+          </div>
+          <h3 class="q-stem animate-enter">${state.currentQ+1}. ${q.q}</h3>
+        `;
 
-      $('main-display').innerHTML = html;
+        q.options.forEach((opt, i) => {
+          const letter = String.fromCharCode(65+i);
+          const isSelected = saved === letter;
+          const isCorrect = q.answer === letter;
+          
+          let cls = "opt";
+          if(saved !== undefined) {
+            cls += " disabled";
+            if(isCorrect) cls += " correct";
+            if(isSelected && !isCorrect) cls += " wrong";
+          } else if(isSelected) {
+            cls += " selected";
+          }
+
+          html += `<div class="${cls} animate-enter" onclick="selectOpt('${letter}')">
+            <div class="opt-letter">${letter}</div>
+            <div>${opt}</div>
+          </div>`;
+        });
+
+        const prevBtn = `<button class="secondary" onclick="navQ(-1)" ${state.currentQ===0?'disabled':''}>Previous</button>`;
+        const nextBtn = `<button class="primary" onclick="navQ(1)" ${saved===undefined?'disabled':''}>Next</button>`;
+        const finishBtn = `<button class="primary" style="background:var(--success);" onclick="finishQuiz()" ${saved===undefined?'disabled':''}>Finish</button>`;
+        
+        const isLast = state.currentQ === state.mcqs.length - 1;
+        html += `<div style="display:flex; gap:15px; margin-top:30px;">${prevBtn} ${isLast ? finishBtn : nextBtn}</div>`;
+        
+        main.innerHTML = html;
+        main.style.opacity = '1'; // Fade in
+      }, 200); // 200ms delay for smooth transition
     }
 
-    window.selectAnswer = (letter) => {
+    window.selectOpt = (letter) => {
       if(state.answers[state.currentQ] !== undefined) return;
-      
       state.answers[state.currentQ] = letter;
       const q = state.mcqs[state.currentQ];
       if(letter === q.answer) state.score++;
-      
-      renderQuizUI();
+      renderQuiz();
     };
 
-    window.navQ = (dir) => {
-      state.currentQ += dir;
-      renderQuizUI();
-    };
+    window.navQ = (dir) => { if(state.currentQ + dir >= 0 && state.currentQ + dir < state.mcqs.length) { state.currentQ += dir; renderQuiz(); } };
 
     async function finishQuiz() {
       state.isQuizRunning = false;
-      const total = state.mcqs.length;
-      const pct = Math.round((state.score / total) * 100);
+      const pct = Math.round((state.score / state.mcqs.length) * 100);
       
-      // Save Score
-      await fetchAPI(`?type=saveScore&email=${state.email}&subject=${$('subject-filter').value}&college=${$('college-filter').value}&score=${state.score}&total=${total}&percentage=${pct}`);
+      await fetchAPI(`?type=saveScore&email=${state.email}&subject=${state.currentFaculty}&college=${$('college-filter').value}&score=${state.score}&total=${state.mcqs.length}&percentage=${pct}`);
+      
+      const msg = pct >= 70 ? "Excellent Work!" : "Keep Practicing!";
+      
+      // Confetti if high score
+      if(pct >= 80) fireConfetti();
 
-      // Show Result View
-      const msg = pct >= 70 ? "Excellent Performance!" : "Keep Practicing!";
       $('main-display').innerHTML = `
-        <div style="text-align:center; padding:50px 20px;">
-          <h3>Quiz Completed!</h3>
-          <div class="score-big">${state.score} / ${total}</div>
-          <p style="font-size:1.5rem; color:var(--text-muted); margin-bottom:40px;">${pct}% Score</p>
-          <div style="display:flex; gap:20px; justify-content:center;">
-            <button onclick="renderQuizUI()" class="primary">Review Answers</button>
-            <button onclick="$('btn-start-quiz').click()" class="secondary">Play Again</button>
+        <div class="text-center animate-enter" style="padding:40px 20px;">
+          <h2 style="font-size:3rem; margin-bottom:10px;">${pct}%</h2>
+          <p style="font-size:1.5rem; color:var(--text-muted); margin-bottom:30px;">${state.score} / ${state.mcqs.length}</p>
+          <div style="background:#eff6ff; padding:20px; border-radius:16px; margin-bottom:30px; display:inline-block;">
+            <b>${msg}</b>
           </div>
-          <p style="margin-top:20px; font-size:0.9rem; color:var(--text-muted);">${msg}</p>
+          <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+            <button onclick="renderQuiz()" class="secondary">Review Answers</button>
+            <button onclick="startQuiz()" class="primary">Play Again</button>
+          </div>
         </div>
       `;
     }
 
     /* --- VIEW QUESTIONS --- */
-    $('btn-view-questions').onclick = async () => {
-      const subj = $('subject-filter').value;
-      const col = $('college-filter').value;
+    function viewQuestions() {
+      const level = $('college-filter').value;
+      const pool = level ? state.mcqs.filter(q => q.college === level) : state.mcqs;
       
-      const res = await fetchAPI('?type=getMCQs');
-      if(res.success) {
-        const all = res.data.mcqs;
-        const qs = all.filter(q => q.subject === subj && (col ? q.college === col : true));
-        
-        if(qs.length === 0) return alert("No questions found.");
-
-        let html = `<h2>Question Bank (${qs.length})</h2>`;
-        qs.forEach((q, i) => {
-          html += `
-            <div style="margin-bottom:30px; padding-bottom:15px; border-bottom:1px solid #eee;">
-              <div style="font-weight:700; margin-bottom:10px;">${i+1}. ${q.q}</div>
-              <div style="color:#64748b; font-size:0.9rem; margin-bottom:10px;">
-                ${q.options.map((o, idx) => {
-                  const letter = String.fromCharCode(65+idx);
-                  const isAns = letter === q.answer;
-                  return `<div style="${isAns?'color:#10b981; font-weight:600;':''}">${letter}. ${o} ${isAns?'✓':''}</div>`;
-                }).join('')}
-              </div>
+      let html = `<h2 class="animate-enter">Question Bank (${pool.length})</h2>`;
+      pool.forEach((q, i) => {
+        html += `
+          <div style="margin-bottom:25px; padding-bottom:15px; border-bottom:1px solid #eee; animate-enter">
+            <div style="font-weight:700; font-size:1.1rem; margin-bottom:10px;">${i+1}. ${q.q}</div>
+            <div style="color:var(--text-muted); font-size:0.95rem;">
+              ${q.options.map((o, idx) => {
+                const l = String.fromCharCode(65+idx);
+                const isAns = l === q.answer;
+                return `<div style="${isAns?'color:var(--success); font-weight:600;':''}">• ${o} ${isAns?'✓':''}</div>`;
+              }).join('')}
             </div>
-          `;
-        });
-        $('main-display').innerHTML = html;
-      }
-    };
+          </div>
+        `;
+      });
+      $('main-display').innerHTML = html;
+    }
 
     /* --- HISTORY --- */
-    $('btn-view-history').onclick = async () => {
+    async function viewHistory() {
       const res = await fetchAPI(`?type=getMyScores&email=${state.email}`);
       if(res.success) {
         if(res.scores.length === 0) {
-          $('main-display').innerHTML = '<h3>No History Found</h3>';
+          $('main-display').innerHTML = '<h2 class="text-center">No History Found</h2>';
           return;
         }
-        let html = '<h2>My History</h2>';
+        let html = '<h2 class="animate-enter">My History</h2>';
         res.scores.forEach(s => {
           html += `
-            <div class="history-item">
+            <div class="history-card animate-enter">
               <div>
-                <div style="font-weight:700;">${s.subject}</div>
+                <div style="font-weight:700; font-size:1.1rem; color:var(--primary);">${s.subject}</div>
                 <div style="font-size:0.85rem; color:var(--text-muted);">${s.date}</div>
               </div>
               <div style="text-align:right;">
-                <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">${s.score}/${s.total}</div>
+                <div style="font-weight:800; font-size:1.3rem;">${s.score}/${s.total}</div>
                 <div style="font-size:0.85rem; color:var(--text-muted);">${s.percentage}%</div>
               </div>
             </div>
@@ -492,7 +537,7 @@
         });
         $('main-display').innerHTML = html;
       }
-    };
+    }
 
     /* --- UTILS --- */
     async function fetchAPI(url) {
@@ -501,13 +546,36 @@
         const text = await res.text();
         const match = text.match(/\{[\s\S]*\}/);
         return match ? JSON.parse(match[0]) : { success: false };
-      } catch (e) {
-        console.error(e);
-        alert("Connection Error");
-        return { success: false };
-      }
+      } catch (e) { return { success: false }; }
     }
 
+    /* --- LIGHTWEIGHT CONFETTI --- */
+    function fireConfetti() {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const particles = [];
+      for(let i=0; i<150; i++) {
+        particles.push({
+          x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height,
+          color: `hsl(${Math.random()*360},70%,50%)`,
+          size: Math.random()*8+2, speedY: Math.random()*3+2, speedX: Math.random()*2-1
+        });
+      }
+      function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach((p,i) => {
+          p.y += p.speedY; p.x += Math.sin(p.y/50);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+          if(p.y > canvas.height) p.y = -10;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+      setTimeout(() => ctx.clearRect(0,0,canvas.width,canvas.height), 4000);
+    }
   </script>
 </body>
 </html>
