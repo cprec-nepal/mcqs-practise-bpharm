@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>CPREC Assessment Portal</title>
   <style>
     :root { --primary: #4f46e5; --bg: #f1f5f9; --white: #fff; --text: #1e293b; --error: #ef4444; --radius: 20px; }
@@ -12,7 +12,7 @@
     #login-screen, #reset-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s; }
     .hidden { opacity: 0; pointer-events: none; z-index: -1; }
     
-    .card { background: var(--white); padding: 40px; border-radius: var(--radius); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+    .card { background: var(--white); padding: 40px; border-radius: var(--radius); width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
     
     input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; }
     input:focus { border-color: var(--primary); outline: none; }
@@ -20,7 +20,14 @@
     button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
     button.secondary { background: white; border: 2px solid #e2e8f0; color: var(--text); }
     
-    .error-msg { color: var(--error); font-size: 0.9rem; margin-bottom: 15px; display: none; }
+    .error-msg { color: var(--error); font-size: 0.9rem; min-height:20px; margin-bottom:10px; display:none; font-weight:600; }
+    
+    #dashboard { display: none; flex: 1; width: 100%; max-width: 1400px; margin: 0 auto; padding: 30px; gap: 30px; align-items: flex-start; }
+    aside { width: 300px; background: var(--white); padding: 24px; border-radius: var(--radius); box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 30px; }
+    main { flex: 1; background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-height: 500px; }
+    
+    /* Mobile */
+    @media (max-width: 768px) { #dashboard { flex-direction: column; padding: 15px; } aside { width: 100%; position: relative; } }
   </style>
 </head>
 <body>
@@ -36,7 +43,6 @@
       
       <button id="btn-login">Login</button>
       <div id="login-error" class="error-msg"></div>
-      
       <button id="btn-reset" class="secondary" style="margin-top:10px;">PIN Expired / Forgot? Update PIN</button>
     </div>
   </div>
@@ -53,7 +59,7 @@
       
       <button id="btn-set-pin">Set New PIN</button>
       <div id="reset-error" class="error-msg"></div>
-      <button id="btn-back" class="secondary">Back to Login</button>
+      <button id="btn-back" class="secondary" style="margin-top:10px;">Back to Login</button>
       
       <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
       <a href="mailto:support@cprecnepal.org" style="display:block; margin-top:10px; color:var(--primary); text-decoration:none; font-weight:600;">📧 Contact Support</a>
@@ -61,12 +67,16 @@
   </div>
 
   <!-- 3. DASHBOARD (Placeholder) -->
-  <div id="dashboard" class="hidden" style="padding:50px; text-align:center;">
-    <h2>Welcome</h2>
-    <p>Redirecting to dashboard...</p>
+  <div id="dashboard">
+    <iframe src="dashboard_content.html" style="width:100%; height:100%; border:none;"></iframe>
+    <div style="text-align:center; padding-top:50px;">
+        <h1>Welcome</h1>
+        <p>Loading Dashboard...</p>
+    </div>
   </div>
 
   <script>
+    // PASTE YOUR DEPLOYED URL HERE
     const API_URL = "https://script.google.com/macros/s/AKfycbyaQrxziGkRXqnr3ZTOqZ4VDSp08IonCv9ZryrEHFWQHdJFo9Yvah_FcCa1fDJkOJa2Lg/exec";
     
     const screens = {
@@ -75,67 +85,96 @@
       dashboard: document.getElementById('dashboard')
     };
 
-    /* --- LOGIC --- */
+    /* --- LOGIN LOGIC --- */
     document.getElementById('btn-login').onclick = async () => {
       const email = document.getElementById('email').value.trim();
       const pin = document.getElementById('pin').value.trim();
       
+      if (!email || !pin) return alert("Enter details");
+      
       const res = await fetchAPI(`?type=checkPinLogin&email=${encodeURIComponent(email)}&pin=${pin}`);
       
-      if(res.success) {
-        location.reload(); // Reload to dashboard
+      if (res.success) {
+        screens.login.classList.add('hidden');
+        screens.dashboard.classList.remove('hidden');
+        screens.dashboard.style.display = 'flex';
+        location.reload(); // Simple redirect to dashboard
       } else if (res.code === "EXPIRED") {
         showResetScreen(email);
       } else {
-        document.getElementById('login-error').textContent = res.message;
-        document.getElementById('login-error').style.display = "block";
+        const errDiv = document.getElementById('login-error');
+        errDiv.textContent = res.message;
+        errDiv.style.display = "block";
       }
     };
 
-    document.getElementById('btn-reset').onclick = () => showResetScreen();
+    /* --- RESET LOGIC --- */
+    document.getElementById('btn-reset').onclick = () => {
+      const email = document.getElementById('email').value.trim();
+      showResetScreen(email);
+    };
 
     function showResetScreen(prefillEmail) {
-      document.getElementById('login-screen').classList.add('hidden');
+      screens.login.classList.add('hidden');
       screens.reset.classList.remove('hidden');
-      if(prefillEmail) {
-        document.getElementById('reset-email').value = prefillEmail;
-        // Auto Request Code
-        document.getElementById('btn-request-reset').click();
-      }
+      if (prefillEmail) document.getElementById('reset-email').value = prefillEmail;
+      // Auto Request Code
+      document.getElementById('btn-request-reset').click();
     }
 
     document.getElementById('btn-back').onclick = () => {
       screens.reset.classList.add('hidden');
       screens.login.classList.remove('hidden');
+      // Clear errors
+      document.getElementById('login-error').style.display = 'none';
+      document.getElementById('reset-error').style.display = 'none';
     };
 
-    /* --- RESET LOGIC --- */
-    document.getElementById('btn-request-reset').onclick = async () => {
+    /* --- REQUEST CODE --- */
+    // Create dynamic button for request code
+    const reqBtn = document.createElement('button');
+    reqBtn.textContent = "Send Code";
+    reqBtn.className = "secondary";
+    reqBtn.style.width = "100%";
+    reqBtn.style.marginBottom = "10px";
+    document.getElementById('new-pin').parentNode.insertBefore(reqBtn, document.getElementById('btn-set-pin'));
+
+    reqBtn.onclick = async () => {
       const email = document.getElementById('reset-email').value.trim();
+      if (!email) return alert("Enter email");
+      
+      reqBtn.textContent = "Sending...";
       const res = await fetchAPI(`?type=requestPinReset&email=${encodeURIComponent(email)}`);
       
-      if(res.success) {
+      if (res.success) {
         alert(res.message);
+        reqBtn.textContent = "Code Sent";
       } else {
-        document.getElementById('reset-error').textContent = res.message;
-        document.getElementById('reset-error').style.display = "block";
+        const errDiv = document.getElementById('reset-error');
+        errDiv.textContent = res.message;
+        errDiv.style.display = "block";
+        reqBtn.textContent = "Send Code";
       }
     };
 
+    /* --- SET PIN --- */
     document.getElementById('btn-set-pin').onclick = async () => {
       const email = document.getElementById('reset-email').value.trim();
       const code = document.getElementById('reset-code').value.trim();
       const newPin = document.getElementById('new-pin').value.trim();
       
+      if (!email || !code || !newPin) return alert("All fields required");
+      
       const res = await fetchAPI(`?type=verifyAndSetPin&email=${encodeURIComponent(email)}&code=${code}&newPin=${newPin}`);
       
-      if(res.success) {
+      if (res.success) {
         alert(res.message);
         screens.reset.classList.add('hidden');
         screens.login.classList.remove('hidden');
       } else {
-        document.getElementById('reset-error').textContent = res.message;
-        document.getElementById('reset-error').style.display = "block";
+        const errDiv = document.getElementById('reset-error');
+        errDiv.textContent = res.message;
+        errDiv.style.display = "block";
       }
     };
 
@@ -145,8 +184,11 @@
         const res = await fetch(API_URL + url, { redirect: 'follow' });
         const text = await res.text();
         const match = text.match(/\{[\s\S]*\}/);
-        return match ? JSON.parse(match[0]) : { success: false };
-      } catch (e) { return { success: false }; }
+        return match ? JSON.parse(match[0]) : { success: false, message: "Server returned invalid text" };
+      } catch (e) { 
+        console.error(e);
+        return { success: false, message: "Connection Error" }; 
+      }
     }
   </script>
 </body>
