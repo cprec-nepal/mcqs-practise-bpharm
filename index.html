@@ -2,335 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>CPREC Assessment Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CPREC Assessment Portal</title>
   <style>
-    /* --- STYLES --- */
-    :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --bg: #f1f5f9;
-      --white: #ffffff;
-      --text: #1e293b;
-      --error: #ef4444;
-      --shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-      --radius: 20px;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* --- DASHBOARD GRID --- */
-    #dashboard {
-      display: none; /* Hidden until verified */
-      flex: 1;
-      max-width: 1400px; margin: 0 auto; width: 100%;
-      padding: 30px; gap: 30px; align-items: flex-start;
-    }
+    :root { --primary: #4f46e5; --bg: #f1f5f9; --white: #fff; --text: #1e293b; --error: #ef4444; --radius: 20px; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
     
-    /* Sidebar */
-    aside {
-      width: 300px; flex-shrink: 0;
-      background: var(--white); padding: 24px; border-radius: var(--radius);
-      box-shadow: var(--shadow); position: sticky; top: 30px;
-      display: flex; flex-direction: column; gap: 20px;
-    }
+    /* Screens */
+    #login-screen, #reset-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.3s; }
+    .hidden { opacity: 0; pointer-events: none; z-index: -1; }
     
-    /* Main */
-    main {
-      flex: 1; background: var(--white); padding: 30px;
-      border-radius: var(--radius); box-shadow: var(--shadow);
-      min-height: 500px;
-    }
-
-    /* --- ACCESS DENIED SCREEN --- */
-    #denied-screen {
-      position: fixed; inset: 0; z-index: 1000;
-      background: linear-gradient(135deg, #ef4444, #b91c1c);
-      display: none; align-items: center; justify-content: center;
-      color: white;
-    }
-    .denied-card {
-      background: rgba(255,255,255,0.95); padding: 40px; border-radius: 30px;
-      text-align: center; max-width: 400px;
-    }
-
-    /* --- ELEMENTS --- */
-    h2 { margin: 0 0 20px 0; }
-    label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.85rem; color: #64748b; }
-    select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; }
-    button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
-    button.primary { background: var(--primary); color: white; }
+    .card { background: var(--white); padding: 40px; border-radius: var(--radius); box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+    
+    input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 15px; font-size: 1rem; box-sizing: border-box; }
+    input:focus { border-color: var(--primary); outline: none; }
+    
+    button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
     button.secondary { background: white; border: 2px solid #e2e8f0; color: var(--text); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* Quiz UI */
-    .opt { padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 10px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-    .opt:hover:not(.disabled) { border-color: var(--primary); background: #e0e7ff; }
-    .opt.selected { background: #e0e7ff; border-color: var(--primary); }
-    .opt.correct { background: #dcfce7; border-color: #10b981; }
-    .opt.wrong { background: #fee2e2; border-color: var(--error); opacity: 0.6; }
-    .opt.disabled { pointer-events: none; }
-
-    /* Responsive */
-    @media (max-width: 768px) { #dashboard { flex-direction: column; padding: 15px; } aside { width: 100%; position: relative; } }
     
-    .hidden { display: none !important; }
-    .badge { background: #e0e7ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+    .error-msg { color: var(--error); font-size: 0.9rem; margin-bottom: 15px; display: none; }
   </style>
 </head>
 <body>
 
-  <!-- 1. LOADING SCREEN -->
-  <div id="loading-screen" style="position:fixed; inset:0; background:#fff; z-index:2000; display:flex; align-items:center; justify-content:center;">
-    <div style="text-align:center;">
-      <div style="font-size:2rem; margin-bottom:20px;">🔍</div>
-      <p>Checking permissions...</p>
+  <!-- 1. LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="card">
+      <h2 style="color:var(--primary); margin-top:0;">Secure Login</h2>
+      <p style="color:gray; margin-top:0;">Enter Email & PIN</p>
+      
+      <input type="email" id="email" placeholder="Email Address" />
+      <input type="password" id="pin" placeholder="4-Digit PIN" maxlength="4" style="text-align:center; letter-spacing:4px; font-size:1.5rem;" />
+      
+      <button id="btn-login">Login</button>
+      <div id="login-error" class="error-msg"></div>
+      
+      <button id="btn-reset" class="secondary" style="margin-top:10px;">PIN Expired / Forgot? Update PIN</button>
     </div>
   </div>
 
-  <!-- 2. ACCESS DENIED SCREEN -->
-  <div id="denied-screen">
-    <div class="denied-card">
-      <div style="font-size:4rem; margin-bottom:10px;">🚫</div>
-      <h2 style="color:#b91c1c;">Access Denied</h2>
-      <p style="color:#64748b; margin-bottom:20px;">
-        Your Google account is <b>not authorized</b> to access this system.
-      </p>
-      <p style="font-size:0.9rem;">Please contact administration.</p>
+  <!-- 2. RESET SCREEN -->
+  <div id="reset-screen" class="hidden">
+    <div class="card">
+      <h3>Update PIN</h3>
+      <p style="font-size:0.9rem; color:gray;">Enter code sent to your email and choose new PIN.</p>
+      
+      <input type="email" id="reset-email" placeholder="Email Address" disabled style="background:#f9fafb;" />
+      <input type="text" id="reset-code" placeholder="6-Digit Code" maxlength="6" style="text-align:center; letter-spacing:2px;" />
+      <input type="password" id="new-pin" placeholder="New 4-Digit PIN" maxlength="4" style="text-align:center; letter-spacing:4px;" />
+      
+      <button id="btn-set-pin">Set New PIN</button>
+      <div id="reset-error" class="error-msg"></div>
+      <button id="btn-back" class="secondary">Back to Login</button>
+      
+      <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+      <a href="mailto:support@cprecnepal.org" style="display:block; margin-top:10px; color:var(--primary); text-decoration:none; font-weight:600;">📧 Contact Support</a>
     </div>
   </div>
 
-  <!-- 3. DASHBOARD -->
-  <div id="dashboard" class="hidden">
-    
-    <!-- Sidebar -->
-    <aside>
-      <div style="text-align:center; margin-bottom:10px;">
-        <div id="user-email" style="font-weight:700;">user@gmail.com</div>
-        <div class="badge">Authorized</div>
-      </div>
-      <hr style="border:0; border-top:1px solid #eee; width:100%; margin:10px 0;">
-
-      <!-- Filters -->
-      <div>
-        <label>Faculty / Subject</label>
-        <select id="subject-filter" onchange="handleFacultyChange()">
-          <option value="">Select Faculty...</option>
-        </select>
-        <label>Level / College</label>
-        <select id="college-filter" onchange="checkButtons()">
-          <option value="">Any Level</option>
-        </select>
-      </div>
-
-      <!-- Actions -->
-      <div style="margin-top:auto;">
-        <button id="btn-start-quiz" class="primary" disabled onclick="startQuiz()">🚀 Start Quiz</button>
-        <button id="btn-view-questions" class="secondary" disabled onclick="viewQuestions()">👁️ View Questions</button>
-        <button id="btn-view-history" class="secondary" onclick="viewHistory()">📊 My History</button>
-        <button onclick="location.reload()" class="secondary" style="border-color:#ef4444; color:#ef4444;">Logout</button>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main id="main-display">
-      <div style="text-align:center; margin-top:100px; color:var(--text-muted);">
-        <h3>Welcome</h3>
-        <p>Select a Faculty from sidebar to begin.</p>
-      </div>
-    </main>
-
+  <!-- 3. DASHBOARD (Placeholder) -->
+  <div id="dashboard" class="hidden" style="padding:50px; text-align:center;">
+    <h2>Welcome</h2>
+    <p>Redirecting to dashboard...</p>
   </div>
 
   <script>
-    // ⚠️ PASTE WEB APP URL HERE
     const API_URL = "https://script.google.com/macros/s/AKfycbyaQrxziGkRXqnr3ZTOqZ4VDSp08IonCv9ZryrEHFWQHdJFo9Yvah_FcCa1fDJkOJa2Lg/exec";
-
-    const state = {
-      email: '',
-      questionsCache: {}, 
-      currentFaculty: '',
-      currentLevel: '',
-      mcqs: [],
-      answers: {},
-      score: 0,
-      currentQ: 0,
-      isQuizRunning: false
+    
+    const screens = {
+      login: document.getElementById('login-screen'),
+      reset: document.getElementById('reset-screen'),
+      dashboard: document.getElementById('dashboard')
     };
 
-    const $ = id => document.getElementById(id);
-
-    /* --- AUTOMATIC LOGIN CHECK --- */
-    window.onload = async () => {
-      const res = await fetchAPI('?type=checkAutoLogin');
-
-      // Hide Loading
-      $('loading-screen').style.display = 'none';
-
-      if (res.success) {
-        // SUCCESS: AUTOMATIC LOGIN
-        state.email = res.email;
-        $('user-email').textContent = state.email;
-        $('dashboard').classList.remove('hidden');
-        $('dashboard').style.display = 'flex';
-        loadFilters();
-      } else {
-        // FAILURE: ACCESS DENIED
-        $('denied-screen').style.display = 'flex';
-      }
-    };
-
-    /* --- DATA & FILTERS (Same as before) --- */
-    async function loadFilters() {
-      const res = await fetchAPI('?type=getFilters');
+    /* --- LOGIC --- */
+    document.getElementById('btn-login').onclick = async () => {
+      const email = document.getElementById('email').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      
+      const res = await fetchAPI(`?type=checkPinLogin&email=${encodeURIComponent(email)}&pin=${pin}`);
+      
       if(res.success) {
-        const data = res.data;
-        $('subject-filter').innerHTML = '<option value="">Select Faculty...</option>' + data.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-        $('college-filter').innerHTML = '<option value="">Any Level</option>' + data.colleges.map(c => `<option value="${c}">${c}</option>`).join('');
-      }
-    }
-
-    async function handleFacultyChange() {
-      const faculty = $('subject-filter').value;
-      if(!faculty) { checkButtons(); return; }
-
-      $('main-display').innerHTML = `<div style="text-align:center; padding:50px;">Loading questions...</div>`;
-      state.currentFaculty = faculty;
-
-      if(state.questionsCache[faculty]) {
-        state.mcqs = state.questionsCache[faculty];
-        $('main-display').innerHTML = `<h3 style="text-align:center;">Ready</h3>`;
-        checkButtons();
+        location.reload(); // Reload to dashboard
+      } else if (res.code === "EXPIRED") {
+        showResetScreen(email);
       } else {
-        const res = await fetchAPI('?type=getMCQs');
-        if(res.success) {
-          const all = res.data.mcqs;
-          const filtered = all.filter(q => q.subject === faculty);
-          state.questionsCache[faculty] = filtered;
-          state.mcqs = filtered;
-          $('main-display').innerHTML = `<h3 style="text-align:center;">Ready</h3>`;
-          checkButtons();
-        }
+        document.getElementById('login-error').textContent = res.message;
+        document.getElementById('login-error').style.display = "block";
       }
-    }
-
-    function checkButtons() {
-      const subj = $('subject-filter').value;
-      $('btn-start-quiz').disabled = !subj;
-      $('btn-view-questions').disabled = !subj;
-    }
-
-    /* --- QUIZ LOGIC (Same as before) --- */
-    function startQuiz() {
-      state.currentQ = 0; state.score = 0; state.answers = {}; state.isQuizRunning = true;
-      const col = $('college-filter').value;
-      const pool = col ? state.mcqs.filter(q => q.college === col) : state.mcqs;
-      
-      if(pool.length === 0) return alert("No questions found.");
-      state.mcqs = pool;
-      renderQuiz();
-    }
-
-    function renderQuiz() {
-      const q = state.mcqs[state.currentQ];
-      const saved = state.answers[state.currentQ];
-      
-      let html = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-          <span class="badge">Q ${state.currentQ + 1}/${state.mcqs.length}</span>
-          <span style="font-weight:700;">Score: ${state.score}</span>
-        </div>
-        <h2 style="margin-bottom:30px;">${q.q}</h2>
-      `;
-
-      q.options.forEach((opt, i) => {
-        const letter = String.fromCharCode(65+i);
-        const isSelected = saved === letter;
-        const isCorrect = q.answer === letter;
-        
-        let cls = "opt";
-        if(saved !== undefined) {
-          cls += " disabled";
-          if(isCorrect) cls += " correct";
-          if(isSelected && !isCorrect) cls += " wrong";
-        } else if(isSelected) {
-          cls += " selected";
-        }
-        html += `<div class="${cls}" onclick="selectOpt('${letter}')"><b>${letter}.</b> ${opt}</div>`;
-      });
-
-      const prevBtn = `<button class="secondary" onclick="navQ(-1)" ${state.currentQ===0?'disabled':''}>Prev</button>`;
-      const nextBtn = `<button class="primary" onclick="navQ(1)" ${saved===undefined?'disabled':''}>Next</button>`;
-      const finishBtn = `<button class="primary" style="background:#10b981;" onclick="finishQuiz()" ${saved===undefined?'disabled':''}>Finish</button>`;
-      
-      const isLast = state.currentQ === state.mcqs.length - 1;
-      html += `<div style="display:flex; gap:10px; margin-top:20px;">${prevBtn} ${isLast ? finishBtn : nextBtn}</div>`;
-      
-      $('main-display').innerHTML = html;
-    }
-
-    window.selectOpt = (letter) => {
-      if(state.answers[state.currentQ] !== undefined) return;
-      state.answers[state.currentQ] = letter;
-      const q = state.mcqs[state.currentQ];
-      if(letter === q.answer) state.score++;
-      renderQuiz();
     };
 
-    window.navQ = (dir) => { if(state.currentQ + dir >= 0 && state.currentQ + dir < state.mcqs.length) { state.currentQ += dir; renderQuiz(); } };
+    document.getElementById('btn-reset').onclick = () => showResetScreen();
 
-    async function finishQuiz() {
-      state.isQuizRunning = false;
-      const total = state.mcqs.length;
-      const pct = Math.round((state.score/total)*100);
-      
-      await fetchAPI(`?type=saveScore&email=${state.email}&subject=${state.currentFaculty}&college=${$('college-filter').value}&score=${state.score}&total=${total}&percentage=${pct}`);
-      
-      $('main-display').innerHTML = `
-        <div style="text-align:center; padding:50px;">
-          <h2>Quiz Completed!</h2>
-          <div style="font-size:3rem; font-weight:800; color:var(--primary); margin:20px 0;">${state.score} / ${total}</div>
-          <div style="display:flex; gap:20px; justify-content:center;">
-             <button onclick="renderQuiz()" class="secondary">Review</button>
-             <button onclick="startQuiz()" class="primary">Play Again</button>
-          </div>
-        </div>
-      `;
-    }
-
-    /* --- VIEW & HISTORY (Same as before) --- */
-    function viewQuestions() {
-      const col = $('college-filter').value;
-      const pool = col ? state.mcqs.filter(q => q.college === col) : state.mcqs;
-      let html = `<h2>Question Bank</h2>`;
-      pool.forEach((q,i) => {
-        html += `<div style="margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #eee;"><b>${i+1}. ${q.q}</b><br>${q.options.map((o,x)=>`<span style="${String.fromCharCode(65+x)===q.answer?'color:#10b981;':''}">• ${o}</span>`).join('<br>')}</div>`;
-      });
-      $('main-display').innerHTML = html;
-    }
-
-    async function viewHistory() {
-      const res = await fetchAPI(`?type=getMyScores&email=${state.email}`);
-      if(res.success) {
-        let html = `<h2>History</h2>`;
-        if(res.scores.length === 0) html += "<p>No history.</p>";
-        else res.scores.forEach(s => { html += `<div style="padding:10px; border-bottom:1px solid #eee;"><b>${s.subject}</b> - ${s.score}/${s.total}</div>`; });
-        $('main-display').innerHTML = html;
+    function showResetScreen(prefillEmail) {
+      document.getElementById('login-screen').classList.add('hidden');
+      screens.reset.classList.remove('hidden');
+      if(prefillEmail) {
+        document.getElementById('reset-email').value = prefillEmail;
+        // Auto Request Code
+        document.getElementById('btn-request-reset').click();
       }
     }
 
-    /* --- UTIL --- */
+    document.getElementById('btn-back').onclick = () => {
+      screens.reset.classList.add('hidden');
+      screens.login.classList.remove('hidden');
+    };
+
+    /* --- RESET LOGIC --- */
+    document.getElementById('btn-request-reset').onclick = async () => {
+      const email = document.getElementById('reset-email').value.trim();
+      const res = await fetchAPI(`?type=requestPinReset&email=${encodeURIComponent(email)}`);
+      
+      if(res.success) {
+        alert(res.message);
+      } else {
+        document.getElementById('reset-error').textContent = res.message;
+        document.getElementById('reset-error').style.display = "block";
+      }
+    };
+
+    document.getElementById('btn-set-pin').onclick = async () => {
+      const email = document.getElementById('reset-email').value.trim();
+      const code = document.getElementById('reset-code').value.trim();
+      const newPin = document.getElementById('new-pin').value.trim();
+      
+      const res = await fetchAPI(`?type=verifyAndSetPin&email=${encodeURIComponent(email)}&code=${code}&newPin=${newPin}`);
+      
+      if(res.success) {
+        alert(res.message);
+        screens.reset.classList.add('hidden');
+        screens.login.classList.remove('hidden');
+      } else {
+        document.getElementById('reset-error').textContent = res.message;
+        document.getElementById('reset-error').style.display = "block";
+      }
+    };
+
+    /* --- UTILS --- */
     async function fetchAPI(url) {
       try {
-        const res = await fetch(API_URL + url);
+        const res = await fetch(API_URL + url, { redirect: 'follow' });
         const text = await res.text();
         const match = text.match(/\{[\s\S]*\}/);
         return match ? JSON.parse(match[0]) : { success: false };
