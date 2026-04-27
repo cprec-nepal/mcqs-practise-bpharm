@@ -132,12 +132,12 @@
       border-color: var(--success); background-color: #d1fae5; color: #065f46; font-weight: 600;
       transform: scale(1.01); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
     }
-    .option-btn.correct::after { content: "✓"; position: absolute; right: 20px; color: var(--success); font-weight: 800; font-size: 1.4rem; }
+    .option-btn.correct::after { content: "\2713"; position: absolute; right: 20px; color: var(--success); font-weight: 800; font-size: 1.4rem; }
     
     .option-btn.incorrect { 
       border-color: var(--error); background-color: #fee2e2; color: #991b1b; opacity: 0.7;
     }
-    .option-btn.incorrect::after { content: "✕"; position: absolute; right: 20px; color: var(--error); font-weight: 800; font-size: 1.4rem; }
+    .option-btn.incorrect::after { content: "\2715"; position: absolute; right: 20px; color: var(--error); font-weight: 800; font-size: 1.4rem; }
 
     .option-btn.disabled { pointer-events: none; }
 
@@ -200,7 +200,7 @@
         CPREC Portal
       </div>
       <h2>Welcome Back</h2>
-      <p>Please enter your credentials to access assessment.</p>
+      <p>Please enter your credentials to access the assessment portal.</p>
       
       <div class="input-group">
         <label>Email Address</label>
@@ -208,7 +208,7 @@
       </div>
       <div class="input-group">
         <label>4-Digit PIN</label>
-        <input type="password" id="pin" placeholder="••••" maxlength="4" style="text-align:center; letter-spacing:5px; font-size:1.4rem;" />
+        <input type="password" id="pin" placeholder="----" maxlength="4" style="text-align:center; letter-spacing:5px; font-size:1.4rem;" />
       </div>
       
       <div id="login-error" class="error-msg"></div>
@@ -225,7 +225,7 @@
       <p>Enter the code sent to your email and create a new 4-digit PIN.</p>
       <div class="input-group"><label>Account Email</label><input type="email" id="reset-email" disabled style="background:#f1f5f9;" /></div>
       <div class="input-group"><label>Verification Code</label><input type="text" id="reset-code" placeholder="000000" maxlength="6" style="text-align:center; letter-spacing:3px;" /></div>
-      <div class="input-group"><label>New 4-Digit PIN</label><input type="password" id="new-pin" placeholder="••••" maxlength="4" style="text-align:center; letter-spacing:5px; font-size:1.4rem;" /></div>
+      <div class="input-group"><label>New 4-Digit PIN</label><input type="password" id="new-pin" placeholder="----" maxlength="4" style="text-align:center; letter-spacing:5px; font-size:1.4rem;" /></div>
       <div id="reset-error" class="error-msg"></div>
       <button id="btn-set-pin" class="btn">Update PIN</button>
       <div class="divider"></div>
@@ -279,12 +279,13 @@
       </div>
 
       <!-- Assessment Active -->
+      <!-- FIX #3: Added id="question-area" so getElementById works -->
       <div id="assessment-active" class="assessment-container hidden fade-in-up">
         <div class="assessment-header">
           <div><span style="font-weight:700; color:var(--text);">Question <span id="q-current">1</span>/<span id="q-total">5</span></span></div>
           <div class="progress-bar-bg"><div id="progress-fill" class="progress-bar-fill"></div></div>
         </div>
-        <div class="question-area">
+        <div id="question-area" class="question-area">
           <h3 id="question-text" class="question-text">Loading Question...</h3>
           <div id="options-container" class="options-grid"></div>
         </div>
@@ -301,7 +302,6 @@
           <button id="btn-close-review" class="btn secondary" style="width:auto; padding:8px 16px; font-size:0.85rem;">Close</button>
         </div>
         <div id="review-list" class="review-list">
-            <!-- Populated by JS -->
         </div>
       </div>
 
@@ -312,7 +312,6 @@
           <button id="btn-close-answerkey" class="btn secondary" style="width:auto; padding:8px 16px; font-size:0.85rem;">Close</button>
         </div>
         <div id="key-list" class="key-list">
-            <!-- Populated by JS -->
         </div>
       </div>
 
@@ -340,139 +339,201 @@
 
   <script>
     /* --- CONFIG --- */
-    const API_URL = "https://script.google.com/macros/s/AKfycbyaQrxziGkRXqnr3ZTOqZ4VDSp08IonCv9ZryrEHFWQHdJFo9Yvah_FcCa1fDJkOJa2Lg/exec";
-    let USE_FALLBACK = false; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbz6uYhDBos_PH_h5EpyzUi4Y_C4F_WwV_8yKZXp46A9bfBOc7d-cRkHaMjlGBcos_iuzg/exec";
+    let USE_FALLBACK = false;
 
     const state = {
       currentUser: null,
-      allQuestions: [], 
+      currentToken: null,   // FIX #5: Store the session token
+      currentRole: null,
+      allQuestions: [],
       assessment: {
         current: 0,
         answers: [],
         score: 0,
         startTime: null,
-        questions: [] 
+        questions: []
       }
     };
 
     /* --- DOM ELEMENTS --- */
-    const screens = { login: document.getElementById('login-screen'), reset: document.getElementById('reset-screen'), dashboard: document.getElementById('dashboard') };
+    const screens = {
+      login: document.getElementById('login-screen'),
+      reset: document.getElementById('reset-screen'),
+      dashboard: document.getElementById('dashboard')
+    };
 
     /* --- TOAST SYSTEM --- */
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
+      toast.className = 'toast ' + type;
       let icon = type === 'error' ? '<svg width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>' : (type === 'success' ? '<svg width="20" height="20" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>' : '');
-      toast.innerHTML = `${icon}<span>${message}</span>`;
+      toast.innerHTML = icon + '<span>' + message + '</span>';
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      setTimeout(function() { toast.remove(); }, 3000);
     }
 
     /* --- NAVIGATION --- */
     function switchScreen(screenName) {
-      Object.values(screens).forEach(el => el.classList.add('hidden'));
+      Object.values(screens).forEach(function(el) { el.classList.add('hidden'); });
       if (screens[screenName]) screens[screenName].classList.remove('hidden');
-      if (screenName === 'login') { document.getElementById('email').value = ''; document.getElementById('pin').value = ''; document.getElementById('login-error').style.display = 'none'; }
+      if (screenName === 'login') {
+        document.getElementById('email').value = '';
+        document.getElementById('pin').value = '';
+        document.getElementById('login-error').style.display = 'none';
+      }
     }
 
     /* --- API HANDLER --- */
+    // FIX #1 & #2: Frontend uses GET with ?type=actionName — must match backend's doGet switch cases
     async function fetchAPI(params) {
       if (USE_FALLBACK) return mockFetch(params);
       try {
         const res = await fetch(API_URL + params, { redirect: 'follow' });
         const text = await res.text();
+        // Google Apps Script sometimes wraps JSON in a callback or adds whitespace
         const match = text.match(/\{[\s\S]*\}/);
         const data = match ? JSON.parse(match[0]) : { success: false, message: "Invalid Response" };
-        if (!data.success && data.message.includes("Connection Error")) { USE_FALLBACK = true; return mockFetch(params); }
+        if (!data.success && data.message && data.message.includes("Connection Error")) {
+          USE_FALLBACK = true;
+          return mockFetch(params);
+        }
         return data;
-      } catch (e) { 
+      } catch (e) {
         console.warn("API Failed, using fallback", e);
-        USE_FALLBACK = true; 
-        return mockFetch(params); 
+        USE_FALLBACK = true;
+        return mockFetch(params);
       }
     }
 
     /* --- MOCK FALLBACK --- */
     function mockFetch(params) {
-      return new Promise(resolve => {
-        setTimeout(() => {
+      return new Promise(function(resolve) {
+        setTimeout(function() {
           if (params.includes("getFilters")) {
             resolve({ success: true, data: { subjects: ["Physics", "Mathematics", "Computer Science"], colleges: ["CPREC Main", "CPREC Annex"] } });
           } else if (params.includes("getMCQs")) {
-             resolve({ success: true, data: { mcqs: [
-               { subject: "Mathematics", college: "CPREC Main", q: "What is 2+2?", options: ["3","4","5","6"], answer: "B", explanation: "Simple addition." },
-               { subject: "Computer Science", college: "CPREC Annex", q: "HTML stands for?", options: ["Hyper Text Markup Language","High Tool Multi Level","Hyperlink Text Mode","None"], answer: "A", explanation: "HTML is standard markup language." },
-               { subject: "Computer Science", college: "CPREC Annex", q: "CSS stands for?", options: ["Creative Style Sheets","Cascading Style Sheets","Computer Style Sheets","Colorful Style Sheets"], answer: "B", explanation: "CSS describes how HTML elements are to be displayed." }
-             ]}});
+            // FIX #4: Mock returns data.mcqs to match backend response structure
+            resolve({ success: true, data: { mcqs: [
+              { subject: "Mathematics", college: "CPREC Main", qnumber: "1", q: "What is 2+2?", options: ["3","4","5","6"], answer: "B" },
+              { subject: "Computer Science", college: "CPREC Annex", qnumber: "2", q: "HTML stands for?", options: ["Hyper Text Markup Language","High Tool Multi Level","Hyperlink Text Mode","None"], answer: "A" },
+              { subject: "Computer Science", college: "CPREC Annex", qnumber: "3", q: "CSS stands for?", options: ["Creative Style Sheets","Cascading Style Sheets","Computer Style Sheets","Colorful Style Sheets"], answer: "B" }
+            ]}});
           } else if (params.includes("checkPinLogin")) {
-             resolve(params.includes("user@cprec.org") && params.includes("1234") ? { success: true, email: "user@cprec.org" } : { success: false, message: "Invalid credentials" });
-          } else if (params.includes("requestPinReset")) { resolve({ success: true, message: "Code is 000000" }); }
-          else if (params.includes("verifyAndSetPin")) { resolve({ success: true, message: "PIN Updated" }); }
-          else { resolve({ success: false, message: "Unknown" }); }
+            resolve(params.includes("user@cprec.org") && params.includes("1234") ? { success: true, data: { token: "mock-token", role: "User", email: "user@cprec.org" } } : { success: false, message: "Invalid credentials" });
+          } else if (params.includes("requestPinReset")) {
+            resolve({ success: true, message: "Code is 000000" });
+          } else if (params.includes("verifyAndSetPin")) {
+            resolve({ success: true, message: "PIN Updated" });
+          } else {
+            resolve({ success: false, message: "Unknown action" });
+          }
         }, 500);
       });
     }
 
     /* --- LOGIN --- */
-    document.getElementById('btn-login').onclick = async () => {
-      const email = document.getElementById('email').value.trim();
-      const pin = document.getElementById('pin').value.trim();
-      const errDiv = document.getElementById('login-error');
+    // FIX #2: Action name is now "checkPinLogin" matching the backend doGet switch
+    document.getElementById('btn-login').onclick = async function() {
+      var email = document.getElementById('email').value.trim();
+      var pin = document.getElementById('pin').value.trim();
+      var errDiv = document.getElementById('login-error');
       if (!email || !pin) return showToast("Fill all fields", "error");
-      const btn = document.getElementById('btn-login'); btn.innerText = "Verifying..."; btn.disabled = true;
-      
-      const res = await fetchAPI(`?type=checkPinLogin&email=${encodeURIComponent(email)}&pin=${pin}`);
-      btn.innerText = "Secure Login"; btn.disabled = false;
+
+      var btn = document.getElementById('btn-login');
+      btn.innerText = "Verifying...";
+      btn.disabled = true;
+
+      var res = await fetchAPI('?type=checkPinLogin&email=' + encodeURIComponent(email) + '&pin=' + encodeURIComponent(pin));
+      btn.innerText = "Secure Login";
+      btn.disabled = false;
 
       if (res.success) {
-        state.currentUser = email;
-        document.getElementById('user-email-display').textContent = email;
-        document.getElementById('user-avatar').textContent = email.charAt(0).toUpperCase();
+        // FIX #5: Store the token and role from login response
+        state.currentUser = res.data.email || email;
+        state.currentToken = res.data.token || '';
+        state.currentRole = res.data.role || 'User';
+
+        document.getElementById('user-email-display').textContent = state.currentUser;
+        document.getElementById('user-avatar').textContent = state.currentUser.charAt(0).toUpperCase();
         showToast("Login Successful", "success");
         switchScreen('dashboard');
         screens.dashboard.style.display = 'flex';
         initDashboard();
-      } else if (res.code === "EXPIRED") { showResetScreen(email); } 
-      else { errDiv.textContent = res.message; errDiv.style.display = "block"; showToast("Login Failed", "error"); }
+      } else if (res.data && res.data.code === 'EXPIRED') {
+        // No PIN set yet — go to reset flow
+        showResetScreen(email);
+      } else {
+        errDiv.textContent = res.message || "Login failed";
+        errDiv.style.display = "block";
+        showToast("Login Failed", "error");
+      }
     };
 
     /* --- RESET --- */
-    document.getElementById('btn-reset').onclick = () => showResetScreen(document.getElementById('email').value.trim());
-    function showResetScreen(e) { switchScreen('reset'); if(e) document.getElementById('reset-email').value = e; if(e) document.getElementById('btn-request-code').click(); }
-    document.getElementById('btn-back').onclick = () => switchScreen('login');
-    document.getElementById('btn-request-code').onclick = async () => {
-      const email = document.getElementById('reset-email').value.trim();
-      if(!email) return showToast("Enter email", "error");
-      const btn = document.getElementById('btn-request-code'); btn.innerText = "Sending..."; btn.disabled = true;
-      const res = await fetchAPI(`?type=requestPinReset&email=${encodeURIComponent(email)}`);
-      btn.innerText = "Resend Code"; btn.disabled = false;
-      if(res.success) showToast(res.message, "success"); else showToast(res.message, "error");
+    document.getElementById('btn-reset').onclick = function() {
+      showResetScreen(document.getElementById('email').value.trim());
     };
-    document.getElementById('btn-set-pin').onclick = async () => {
-      const e = document.getElementById('reset-email').value.trim(), c = document.getElementById('reset-code').value.trim(), p = document.getElementById('new-pin').value.trim();
-      if(!e||!c||p.length!==4) return showToast("Invalid input", "error");
-      const res = await fetchAPI(`?type=verifyAndSetPin&email=${encodeURIComponent(e)}&code=${c}&newPin=${p}`);
-      if(res.success) { showToast("PIN Updated", "success"); switchScreen('login'); } else showToast(res.message, "error");
+
+    function showResetScreen(e) {
+      switchScreen('reset');
+      if (e) document.getElementById('reset-email').value = e;
+      if (e) document.getElementById('btn-request-code').click();
+    }
+
+    document.getElementById('btn-back').onclick = function() { switchScreen('login'); };
+
+    // FIX #2: Action name is now "requestPinReset" matching backend
+    document.getElementById('btn-request-code').onclick = async function() {
+      var email = document.getElementById('reset-email').value.trim();
+      if (!email) return showToast("Enter email", "error");
+      var btn = document.getElementById('btn-request-code');
+      btn.innerText = "Sending...";
+      btn.disabled = true;
+      var res = await fetchAPI('?type=requestPinReset&email=' + encodeURIComponent(email));
+      btn.innerText = "Resend Code";
+      btn.disabled = false;
+      if (res.success) showToast(res.message || "Code sent", "success");
+      else showToast(res.message || "Failed", "error");
     };
-    document.getElementById('btn-logout').onclick = () => { state.currentUser = null; switchScreen('login'); screens.dashboard.style.display = 'none'; };
+
+    // FIX #2: Action name is now "verifyAndSetPin" matching backend
+    document.getElementById('btn-set-pin').onclick = async function() {
+      var e = document.getElementById('reset-email').value.trim();
+      var c = document.getElementById('reset-code').value.trim();
+      var p = document.getElementById('new-pin').value.trim();
+      if (!e || !c || p.length !== 4) return showToast("Invalid input", "error");
+      var res = await fetchAPI('?type=verifyAndSetPin&email=' + encodeURIComponent(e) + '&code=' + encodeURIComponent(c) + '&newPin=' + encodeURIComponent(p));
+      if (res.success) {
+        showToast("PIN Updated", "success");
+        switchScreen('login');
+      } else {
+        showToast(res.message || "Failed", "error");
+      }
+    };
+
+    document.getElementById('btn-logout').onclick = function() {
+      state.currentUser = null;
+      state.currentToken = null;
+      state.currentRole = null;
+      switchScreen('login');
+      screens.dashboard.style.display = 'none';
+    };
 
     /* --- DASHBOARD LOGIC --- */
     async function initDashboard() {
       resetDashboard();
       document.getElementById('filter-loading').classList.remove('hidden');
       document.getElementById('filter-form').classList.add('hidden');
-      
-      const filterRes = await fetchAPI('?type=getFilters');
-      if (filterRes.success) {
-        // 1. Populate Subjects
-        populateSelect('filter-subject', filterRes.data.subjects);
-        
-        // 2. Populate Colleges (Initial full list)
-        populateSelect('filter-college', filterRes.data.colleges);
 
-        // 3. Add Listener to Subject Dropdown for Dynamic Filtering
-        const subjectSelect = document.getElementById('filter-subject');
+      // Fetch filters
+      var filterRes = await fetchAPI('?type=getFilters');
+      if (filterRes.success && filterRes.data) {
+        populateSelect('filter-subject', filterRes.data.subjects || []);
+        populateSelect('filter-college', filterRes.data.colleges || []);
+
+        var subjectSelect = document.getElementById('filter-subject');
         subjectSelect.addEventListener('change', handleSubjectChange);
 
         document.getElementById('filter-loading').classList.add('hidden');
@@ -481,38 +542,37 @@
         document.getElementById('filter-loading').innerText = "Could not load filters.";
       }
 
-      const mcqRes = await fetchAPI('?type=getMCQs');
-      if (mcqRes.success) {
-        state.allQuestions = mcqRes.data.mcqs;
+      // Fetch ALL questions (no token required for initial load)
+      // FIX #4 & #5: Backend now returns { mcqs: [...] } inside data
+      var mcqRes = await fetchAPI('?type=getMCQs');
+      if (mcqRes.success && mcqRes.data) {
+        state.allQuestions = mcqRes.data.mcqs || [];
       } else {
         showToast("Failed to load questions", "error");
       }
     }
 
-    // NEW: Dynamic Filtering Logic
+    // Dynamic college filtering based on subject
     function handleSubjectChange(e) {
-      const selectedSubject = e.target.value;
-      
-      // Get colleges relevant to the selected subject
-      const relevantColleges = [];
-      
+      var selectedSubject = e.target.value;
+      var relevantColleges = [];
+
       if (selectedSubject === "All") {
-        // If "All", reset to show everything
-        state.allQuestions.forEach(q => {
-          if(q.college) relevantColleges.push(q.college);
+        state.allQuestions.forEach(function(q) {
+          if (q.college) relevantColleges.push(q.college);
         });
       } else {
-        // Filter questions by subject, then collect unique colleges
-        const filteredQuestions = state.allQuestions.filter(q => q.subject === selectedSubject);
-        filteredQuestions.forEach(q => {
-          if(q.college) relevantColleges.push(q.college);
+        state.allQuestions.filter(function(q) { return q.subject === selectedSubject; }).forEach(function(q) {
+          if (q.college) relevantColleges.push(q.college);
         });
       }
 
-      // Remove duplicates and sort
-      const uniqueColleges = [...new Set(relevantColleges)].sort();
-      
-      // Update College Dropdown
+      var uniqueColleges = [];
+      relevantColleges.forEach(function(c) {
+        if (uniqueColleges.indexOf(c) === -1) uniqueColleges.push(c);
+      });
+      uniqueColleges.sort();
+
       populateSelect('filter-college', uniqueColleges);
     }
 
@@ -526,10 +586,10 @@
     }
 
     function populateSelect(id, items) {
-      const select = document.getElementById(id);
-      select.innerHTML = `<option value="All">All</option>`; 
-      items.forEach(item => {
-        const opt = document.createElement('option');
+      var select = document.getElementById(id);
+      select.innerHTML = '<option value="All">All</option>';
+      items.forEach(function(item) {
+        var opt = document.createElement('option');
         opt.value = item;
         opt.innerText = item;
         select.appendChild(opt);
@@ -537,20 +597,20 @@
     }
 
     /* --- START ASSESSMENT --- */
-    document.getElementById('btn-start-assessment').onclick = () => {
-      const subject = document.getElementById('filter-subject').value;
-      const college = document.getElementById('filter-college').value;
+    document.getElementById('btn-start-assessment').onclick = function() {
+      var subject = document.getElementById('filter-subject').value;
+      var college = document.getElementById('filter-college').value;
 
-      let filtered = state.allQuestions.filter(q => {
-        const mSub = subject === "All" || q.subject === subject;
-        const mCol = college === "All" || q.college === college;
+      var filtered = state.allQuestions.filter(function(q) {
+        var mSub = subject === "All" || q.subject === subject;
+        var mCol = college === "All" || q.college === college;
         return mSub && mCol;
       });
 
       if (filtered.length === 0) return showToast("No questions found for this selection.", "error");
 
-      const mappedQuestions = filtered.map(q => {
-        const answerIndex = ['A','B','C','D'].indexOf(String(q.answer).toUpperCase());
+      var mappedQuestions = filtered.map(function(q) {
+        var answerIndex = ['A','B','C','D'].indexOf(String(q.answer).toUpperCase());
         return {
           id: q.qnumber,
           text: q.q,
@@ -559,24 +619,23 @@
         };
       });
 
-      mappedQuestions.sort(() => Math.random() - 0.5); // Shuffle for Quiz
+      mappedQuestions.sort(function() { return Math.random() - 0.5; });
       startAssessment(mappedQuestions);
     };
 
-    /* --- VIEW ANSWER KEY (NEW FEATURE) --- */
-    document.getElementById('btn-view-answer-key').onclick = () => {
-      const subject = document.getElementById('filter-subject').value;
-      const college = document.getElementById('filter-college').value;
+    /* --- VIEW ANSWER KEY --- */
+    document.getElementById('btn-view-answer-key').onclick = function() {
+      var subject = document.getElementById('filter-subject').value;
+      var college = document.getElementById('filter-college').value;
 
-      let filtered = state.allQuestions.filter(q => {
-        const mSub = subject === "All" || q.subject === subject;
-        const mCol = college === "All" || q.college === college;
+      var filtered = state.allQuestions.filter(function(q) {
+        var mSub = subject === "All" || q.subject === subject;
+        var mCol = college === "All" || q.college === college;
         return mSub && mCol;
       });
 
-      // Map for display
-      const mapped = filtered.map(q => {
-        const answerIndex = ['A','B','C','D'].indexOf(String(q.answer).toUpperCase());
+      var mapped = filtered.map(function(q) {
+        var answerIndex = ['A','B','C','D'].indexOf(String(q.answer).toUpperCase());
         return {
           id: q.qnumber,
           text: q.q,
@@ -588,47 +647,38 @@
       renderAnswerKey(mapped);
     };
 
-    document.getElementById('btn-close-answerkey').onclick = () => {
-        document.getElementById('assessment-answerkey').classList.add('hidden');
-        document.getElementById('assessment-intro').classList.remove('hidden');
+    document.getElementById('btn-close-answerkey').onclick = function() {
+      document.getElementById('assessment-answerkey').classList.add('hidden');
+      document.getElementById('assessment-intro').classList.remove('hidden');
     };
 
     function renderAnswerKey(questions) {
-        const list = document.getElementById('key-list');
-        list.innerHTML = '';
+      var list = document.getElementById('key-list');
+      list.innerHTML = '';
 
-        if(questions.length === 0) {
-            list.innerHTML = '<div style="padding:20px; text-align:center;">No questions available.</div>';
-        }
+      if (questions.length === 0) {
+        list.innerHTML = '<div style="padding:20px; text-align:center;">No questions available.</div>';
+      }
 
-        questions.forEach((q, i) => {
-            const li = document.createElement('li');
-            li.className = 'key-item fade-in-up';
-            li.style.animationDelay = `${i * 0.05}s`; // Staggered animation
-            
-            // Render ALL options
-            let optionsHtml = '';
-            q.options.forEach((opt, idx) => {
-                const isCorrect = (idx === q.correct);
-                const cssClass = isCorrect ? 'key-opt correct-answer' : 'key-opt'; // Correct gets green, others neutral
-                const badge = isCorrect ? '<span class="badge badge-correct">Correct</span>' : '';
-                optionsHtml += `
-                    <div class="${cssClass}">
-                        <span>${opt} ${badge}</span>
-                    </div>
-                `;
-            });
-            
-            li.innerHTML = `
-                <div class="key-q">${i+1}. ${q.text}</div>
-                ${optionsHtml}
-            `;
-            
-            list.appendChild(li);
+      questions.forEach(function(q, i) {
+        var li = document.createElement('li');
+        li.className = 'key-item fade-in-up';
+        li.style.animationDelay = (i * 0.05) + 's';
+
+        var optionsHtml = '';
+        q.options.forEach(function(opt, idx) {
+          var isCorrect = (idx === q.correct);
+          var cssClass = isCorrect ? 'key-opt correct-answer' : 'key-opt';
+          var badge = isCorrect ? '<span class="badge badge-correct">Correct</span>' : '';
+          optionsHtml += '<div class="' + cssClass + '"><span>' + opt + ' ' + badge + '</span></div>';
         });
 
-        document.getElementById('assessment-intro').classList.add('hidden');
-        document.getElementById('assessment-answerkey').classList.remove('hidden');
+        li.innerHTML = '<div class="key-q">' + (i + 1) + '. ' + q.text + '</div>' + optionsHtml;
+        list.appendChild(li);
+      });
+
+      document.getElementById('assessment-intro').classList.add('hidden');
+      document.getElementById('assessment-answerkey').classList.remove('hidden');
     }
 
     /* --- QUIZ LOGIC --- */
@@ -642,40 +692,48 @@
       startTimer();
     }
 
-    document.getElementById('btn-restart').onclick = () => { resetDashboard(); };
-    document.getElementById('btn-close-review').onclick = () => {
-        document.getElementById('assessment-review').classList.add('hidden');
-        document.getElementById('assessment-result').classList.remove('hidden');
+    document.getElementById('btn-restart').onclick = function() { resetDashboard(); };
+
+    document.getElementById('btn-close-review').onclick = function() {
+      document.getElementById('assessment-review').classList.add('hidden');
+      document.getElementById('assessment-result').classList.remove('hidden');
     };
-    document.getElementById('btn-view-review').onclick = () => {
-        document.getElementById('assessment-result').classList.add('hidden');
-        document.getElementById('assessment-review').classList.remove('hidden');
+
+    document.getElementById('btn-view-review').onclick = function() {
+      document.getElementById('assessment-result').classList.add('hidden');
+      document.getElementById('assessment-review').classList.remove('hidden');
     };
 
     function loadQuestion(index) {
-      const q = state.assessment.questions[index];
-      const qArea = document.getElementById('question-area');
-      
+      var q = state.assessment.questions[index];
+
+      // FIX #3: Use getElementById('question-area') — now the div has id="question-area"
+      var qArea = document.getElementById('question-area');
+      if (!qArea) {
+        console.error('question-area element not found!');
+        return;
+      }
+
       qArea.classList.remove('fade-in-up');
       qArea.style.opacity = '0';
       qArea.style.transform = 'translateY(10px)';
       qArea.style.transition = 'none';
 
-      setTimeout(() => {
+      setTimeout(function() {
         document.getElementById('q-current').innerText = index + 1;
         document.getElementById('q-total').innerText = state.assessment.questions.length;
         document.getElementById('question-text').innerText = q.text;
-        document.getElementById('progress-fill').style.width = `${(index / state.assessment.questions.length) * 100}%`;
+        document.getElementById('progress-fill').style.width = ((index / state.assessment.questions.length) * 100) + '%';
 
-        const container = document.getElementById('options-container');
+        var container = document.getElementById('options-container');
         container.innerHTML = '';
         document.getElementById('btn-next-question').disabled = true;
 
-        q.options.forEach((opt, i) => {
-          const btn = document.createElement('div');
+        q.options.forEach(function(opt, i) {
+          var btn = document.createElement('div');
           btn.className = 'option-btn';
           btn.innerText = opt;
-          btn.onclick = () => selectOption(i, btn);
+          btn.onclick = function() { selectOption(i, btn); };
           container.appendChild(btn);
         });
 
@@ -683,40 +741,41 @@
         qArea.style.opacity = '1';
         qArea.style.transform = 'translateY(0)';
         qArea.classList.add('fade-in-up');
-
       }, 200);
     }
 
     function selectOption(optIndex, btnElement) {
-      const currentQ = state.assessment.questions[state.assessment.current];
-      const allBtns = document.querySelectorAll('.option-btn');
+      var currentQ = state.assessment.questions[state.assessment.current];
+      var allBtns = document.querySelectorAll('.option-btn');
 
-      allBtns.forEach(b => {
+      allBtns.forEach(function(b) {
         b.classList.add('disabled');
         b.onclick = null;
       });
 
-      const isCorrect = (optIndex === currentQ.correct);
+      var isCorrect = (optIndex === currentQ.correct);
 
       if (isCorrect) {
         btnElement.classList.add('correct');
         state.assessment.score++;
       } else {
         btnElement.classList.add('incorrect');
-        const container = document.querySelector('.assessment-container');
+        var container = document.querySelector('.assessment-container');
         container.classList.add('shake');
-        setTimeout(() => container.classList.remove('shake'), 500);
-        
-        const correctBtn = document.querySelectorAll('.option-btn')[currentQ.correct];
-        if (correctBtn) correctBtn.classList.add('correct');
+        setTimeout(function() { container.classList.remove('shake'); }, 500);
+
+        // Highlight the correct answer
+        if (currentQ.correct >= 0 && currentQ.correct < allBtns.length) {
+          allBtns[currentQ.correct].classList.add('correct');
+        }
       }
 
       state.assessment.answers[state.assessment.current] = optIndex;
       document.getElementById('btn-next-question').disabled = false;
     }
 
-    document.getElementById('btn-next-question').onclick = () => {
-      const currentIdx = state.assessment.current;
+    document.getElementById('btn-next-question').onclick = function() {
+      var currentIdx = state.assessment.current;
       if (currentIdx < state.assessment.questions.length - 1) {
         state.assessment.current++;
         loadQuestion(state.assessment.current);
@@ -728,75 +787,61 @@
     function finishAssessment() {
       document.getElementById('assessment-active').classList.add('hidden');
       document.getElementById('assessment-result').classList.remove('hidden');
-      
-      const score = state.assessment.score;
-      const total = state.assessment.questions.length;
-      const percentage = (score / total) * 100;
-      document.getElementById('final-score').innerText = `${score}/${total}`;
-      document.getElementById('score-circle').style.background = `conic-gradient(var(--primary) ${percentage}%, #e2e8f0 0%)`;
-      
-      const msg = percentage === 100 ? "Perfect!" : percentage >= 80 ? "Excellent!" : percentage >= 60 ? "Good!" : "Keep Practicing";
+
+      var score = state.assessment.score;
+      var total = state.assessment.questions.length;
+      var percentage = (score / total) * 100;
+      document.getElementById('final-score').innerText = score + '/' + total;
+      document.getElementById('score-circle').style.background = 'conic-gradient(var(--primary) ' + percentage + '%, #e2e8f0 0%)';
+
+      var msg = percentage === 100 ? "Perfect!" : percentage >= 80 ? "Excellent!" : percentage >= 60 ? "Good!" : "Keep Practicing";
       document.getElementById('result-message').innerText = msg;
       stopTimer();
-      
       renderReview();
     }
 
     function renderReview() {
-        const list = document.getElementById('review-list');
-        list.innerHTML = '';
-        
-        state.assessment.questions.forEach((q, i) => {
-            const userAnsIdx = state.assessment.answers[i];
-            const isCorrect = userAnsIdx === q.correct;
-            
-            const li = document.createElement('li');
-            li.className = 'review-item';
-            
-            // Render ALL options for this question
-            let optionsHtml = '';
-            q.options.forEach((opt, idx) => {
-                let cssClass = 'review-opt';
-                let badge = '';
+      var list = document.getElementById('review-list');
+      list.innerHTML = '';
 
-                if (idx === q.correct) {
-                    cssClass += ' correct-answer'; // Green
-                    badge = '<span class="badge badge-correct">Correct</span>';
-                } else if (idx === userAnsIdx) {
-                    // User picked this wrong answer
-                    cssClass += ' wrong'; // Red
-                    badge = '<span class="badge badge-user">Your Choice</span>';
-                } else {
-                    // Neutral option (neither correct nor chosen)
-                    // cssClass stays default
-                }
+      state.assessment.questions.forEach(function(q, i) {
+        var userAnsIdx = state.assessment.answers[i];
+        var isCorrect = userAnsIdx === q.correct;
 
-                optionsHtml += `
-                    <div class="${cssClass}">
-                        <span>${opt} ${badge}</span>
-                    </div>
-                `;
-            });
+        var li = document.createElement('li');
+        li.className = 'review-item';
 
-            li.innerHTML = `
-                <div class="review-q">${i+1}. ${q.text}</div>
-                ${optionsHtml}
-            `;
-            
-            list.appendChild(li);
+        var optionsHtml = '';
+        q.options.forEach(function(opt, idx) {
+          var cssClass = 'review-opt';
+          var badge = '';
+
+          if (idx === q.correct) {
+            cssClass += ' correct-answer';
+            badge = '<span class="badge badge-correct">Correct</span>';
+          } else if (idx === userAnsIdx && idx !== q.correct) {
+            cssClass += ' wrong';
+            badge = '<span class="badge badge-user">Your Choice</span>';
+          }
+
+          optionsHtml += '<div class="' + cssClass + '"><span>' + opt + ' ' + badge + '</span></div>';
         });
+
+        li.innerHTML = '<div class="review-q">' + (i + 1) + '. ' + q.text + '</div>' + optionsHtml;
+        list.appendChild(li);
+      });
     }
 
     /* --- TIMER --- */
-    let timerInterval;
+    var timerInterval;
     function startTimer() {
-      const start = Date.now();
-      const display = document.getElementById('timer');
-      timerInterval = setInterval(() => {
-        const delta = Math.floor((Date.now() - start) / 1000);
-        const m = Math.floor(delta / 60).toString().padStart(2, '0');
-        const s = (delta % 60).toString().padStart(2, '0');
-        display.innerText = `${m}:${s}`;
+      var start = Date.now();
+      var display = document.getElementById('timer');
+      timerInterval = setInterval(function() {
+        var delta = Math.floor((Date.now() - start) / 1000);
+        var m = Math.floor(delta / 60).toString().padStart(2, '0');
+        var s = (delta % 60).toString().padStart(2, '0');
+        display.innerText = m + ':' + s;
       }, 1000);
     }
     function stopTimer() { clearInterval(timerInterval); }
